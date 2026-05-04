@@ -1,11 +1,11 @@
 {
-  "week_ending": "2026-04-27",
+  "week_ending": "2026-05-04",
   "source": "livestock-live.com",
   "weeks": [
-    "2026-04-06",
     "2026-04-13",
     "2026-04-20",
-    "2026-04-27"
+    "2026-04-27",
+    "2026-05-04"
   ],
   "categories": {
     "male": {
@@ -2234,7 +2234,7 @@
     "WAX": "Wagyu Cross"
   },
   "_meta": {
-    "generated_at": "2026-05-01T17:48:21.239014Z",
+    "generated_at": "2026-05-04T04:00:02.996588Z",
     "scraper_version": "1.0",
     "rows_added": 318,
     "rows_skipped": 6
