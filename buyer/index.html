@@ -9,25 +9,15 @@
 <script src="/html2canvas.min.js" defer></script>
 <style>
   /* ============================================================
-     PAGE LAYOUT (form left, output right)
+     FORM VIEW - single centered card
      ============================================================ */
-  .layout {
-    display: grid;
-    grid-template-columns: 360px 1fr;
-    gap: 32px;
-    align-items: start;
-  }
-  @media (max-width: 980px) {
-    .layout { grid-template-columns: 1fr; }
-  }
-
   .form-card {
     background: var(--white);
     border: 1px solid var(--rule);
     border-radius: 6px;
-    padding: 22px 22px 24px;
-    position: sticky;
-    top: 20px;
+    padding: 28px 28px 30px;
+    max-width: 520px;
+    margin: 0 auto;
   }
   .form-eyebrow {
     font-size: 10px;
@@ -40,9 +30,9 @@
   .form-title {
     font-family: 'Poppins', sans-serif;
     font-weight: 500;
-    font-size: 22px;
+    font-size: 24px;
     color: var(--brand-blue);
-    margin-bottom: 18px;
+    margin-bottom: 20px;
     letter-spacing: -0.01em;
   }
   .field { margin-bottom: 14px; }
@@ -64,7 +54,7 @@
   }
   .field input, .field select {
     width: 100%;
-    padding: 10px 12px;
+    padding: 11px 12px;
     border: 1px solid var(--rule);
     border-radius: 4px;
     background: var(--cream);
@@ -92,7 +82,7 @@
   }
   .sex-toggle button {
     flex: 1;
-    padding: 8px 10px;
+    padding: 9px 10px;
     border: none;
     background: transparent;
     font-family: 'Carlito', sans-serif;
@@ -108,7 +98,7 @@
   .hint {
     margin-top: -6px;
     margin-bottom: 14px;
-    padding: 8px 12px;
+    padding: 9px 12px;
     background: var(--cream-deep);
     border-left: 3px solid var(--brand-green);
     border-radius: 0 4px 4px 0;
@@ -120,7 +110,7 @@
   .hint.empty { display: none; }
   .generate-btn {
     width: 100%;
-    padding: 12px 16px;
+    padding: 14px 16px;
     background: var(--brand-blue);
     color: var(--white);
     border: none;
@@ -128,67 +118,62 @@
     font-family: 'Carlito', sans-serif;
     font-size: 13px;
     font-weight: 700;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     cursor: pointer;
-    margin-top: 6px;
+    margin-top: 8px;
   }
   .generate-btn:hover { background: #2C3470; }
 
-  .empty-state {
-    background: var(--cream-deep);
-    border: 1px dashed var(--rule);
-    border-radius: 6px;
-    padding: 80px 40px;
-    text-align: center;
-    color: var(--brand-grey);
-  }
-  .empty-state .empty-headline {
-    font-family: 'Poppins', sans-serif;
-    font-size: 22px;
-    font-style: italic;
-    color: var(--brand-blue);
-    font-weight: 500;
-    margin-bottom: 10px;
-  }
-  .empty-state p {
-    font-size: 14px;
-    color: var(--brand-grey);
-    max-width: 420px;
-    margin: 0 auto;
-  }
-
-  .actions {
-    margin-top: 16px;
+  /* ============================================================
+     RESULT VIEW
+     ============================================================ */
+  .result-controls {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
     gap: 12px;
   }
-  .action-btn {
-    flex: 1;
-    padding: 12px 16px;
-    border-radius: 4px;
+  .back-btn {
+    background: none;
+    border: 1px solid var(--rule);
+    color: var(--brand-blue);
     font-family: 'Carlito', sans-serif;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
+    padding: 10px 16px;
+    border-radius: 4px;
     cursor: pointer;
-    border: 1px solid var(--rule);
-    background: var(--white);
-    color: var(--brand-blue);
+    transition: background 0.15s ease, border-color 0.15s ease;
   }
-  .action-btn.primary {
-    background: var(--brand-blue);
-    color: var(--white);
+  .back-btn:hover {
+    background: var(--white);
     border-color: var(--brand-blue);
   }
-  .action-btn:hover { background: var(--cream-deep); }
-  .action-btn.primary:hover { background: #2C3470; }
+  .download-btn-top {
+    background: var(--brand-blue);
+    border: 1px solid var(--brand-blue);
+    color: var(--white);
+    font-family: 'Carlito', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 10px 18px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .download-btn-top:hover { background: #2C3470; }
 
-  /* ============================================================
-     INFOGRAPHIC 1080 × 1920 (rendered to PNG via html2canvas)
-     ============================================================ */
-  .infographic-wrap { position: relative; }
+  .infographic-wrap {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+  }
   .infographic-scaler { transform-origin: top left; }
   .infographic {
     width: 1080px;
@@ -217,8 +202,6 @@
     display: flex;
     flex-direction: column;
   }
-
-  /* Header */
   .ig-header {
     display: flex;
     align-items: center;
@@ -244,8 +227,6 @@
     margin-top: 6px;
     font-size: 16px;
   }
-
-  /* Headline block - generous breathing */
   .ig-head-block {
     margin-top: 84px;
     margin-bottom: 36px;
@@ -272,8 +253,6 @@
     color: var(--brand-green-dark);
     font-weight: 500;
   }
-
-  /* Win box - lead with strength */
   .ig-win-box {
     background: var(--brand-blue);
     border-left: 6px solid var(--brand-green);
@@ -343,6 +322,7 @@
     justify-content: space-between;
   }
   .ig-card.mart.dear { border-left: 6px solid var(--amber); }
+  .ig-card.mart.upside { border-left: 6px solid var(--brand-green-dark); }
 
   .ig-card-top {
     display: grid;
@@ -398,13 +378,13 @@
   .ig-sub-figure {
     margin-top: 8px;
     font-size: 16px;
-    color: var(--amber);
     font-weight: 700;
     letter-spacing: 0.02em;
     font-style: italic;
   }
+  .ig-card.mart.dear .ig-sub-figure { color: var(--amber); }
+  .ig-card.mart.upside .ig-sub-figure { color: var(--brand-green-dark); }
 
-  /* FF detail line under figure */
   .ig-ff-detail {
     padding-top: 20px;
     border-top: 1px solid rgba(255,255,255,0.18);
@@ -428,7 +408,6 @@
     border-radius: 2px;
   }
 
-  /* Mart breakdown */
   .ig-breakdown {
     padding-top: 16px;
     border-top: 1px solid var(--cream-deep);
@@ -440,29 +419,24 @@
     letter-spacing: 0.02em;
     margin-bottom: 8px;
   }
-  .ig-bd-small strong {
-    color: var(--brand-grey);
-    font-weight: 700;
-  }
+  .ig-bd-small strong { color: var(--brand-grey); font-weight: 700; }
   .ig-bd-medium {
     font-size: 17px;
     line-height: 1.5;
     color: var(--brand-grey);
     margin-bottom: 14px;
   }
-  .ig-bd-medium strong {
-    color: var(--ink);
-    font-weight: 700;
-  }
+  .ig-bd-medium strong { color: var(--ink); font-weight: 700; }
   .ig-mart-tax {
     font-family: 'Poppins', sans-serif;
     font-style: italic;
     font-size: 30px;
     font-weight: 500;
-    color: var(--amber);
     letter-spacing: -0.01em;
     line-height: 1;
   }
+  .ig-card.mart.dear .ig-mart-tax { color: var(--amber); }
+  .ig-card.mart.upside .ig-mart-tax { color: var(--brand-green-dark); }
   .ig-mart-tax .label {
     font-style: normal;
     font-weight: 700;
@@ -473,7 +447,6 @@
     vertical-align: 0.18em;
   }
 
-  /* Footer */
   .ig-footer {
     margin-top: auto;
     padding-top: 22px;
@@ -504,6 +477,129 @@
     text-transform: uppercase;
     color: var(--brand-blue);
   }
+
+  /* ============================================================
+     TRADE TALLY (page-level, below infographic, not in PNG)
+     ============================================================ */
+  .trade-tally {
+    margin: 32px auto 0;
+    max-width: 800px;
+    padding: 28px 32px 26px;
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-top: 4px solid var(--brand-green);
+    border-radius: 6px;
+  }
+  .tally-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--amber);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .tally-head {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 22px;
+    color: var(--brand-blue);
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    margin-bottom: 18px;
+  }
+  .tally-rows {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    row-gap: 12px;
+    column-gap: 24px;
+    font-size: 15px;
+  }
+  .tally-rows .lbl { color: var(--brand-grey); line-height: 1.4; }
+  .tally-rows .lbl .sub {
+    display: block;
+    color: var(--brand-grey-light);
+    font-size: 12px;
+    margin-top: 2px;
+  }
+  .tally-rows .val {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 20px;
+    color: var(--ink);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+  }
+  .tally-total {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    column-gap: 24px;
+    align-items: center;
+  }
+  .tally-total .lbl {
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 16px;
+    letter-spacing: 0.01em;
+  }
+  .tally-total .val {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 36px;
+    color: var(--brand-blue);
+    letter-spacing: -0.015em;
+    font-variant-numeric: tabular-nums;
+  }
+  .tally-frame {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: var(--cream-deep);
+    border-left: 3px solid var(--brand-green);
+    border-radius: 0 4px 4px 0;
+    font-style: italic;
+    color: var(--brand-blue);
+    font-size: 15px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+  .tally-fine {
+    margin-top: 12px;
+    font-size: 11px;
+    color: var(--brand-grey-light);
+    line-height: 1.5;
+  }
+
+  .download-btn-bottom {
+    display: block;
+    margin: 28px auto 0;
+    padding: 14px 32px;
+    background: var(--brand-blue);
+    color: var(--white);
+    border: none;
+    border-radius: 4px;
+    font-family: 'Carlito', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .download-btn-bottom:hover { background: #2C3470; }
+
+  /* Mobile */
+  @media (max-width: 720px) {
+    .form-card { padding: 22px 20px 24px; }
+    .result-controls { flex-direction: column; align-items: stretch; }
+    .back-btn, .download-btn-top { width: 100%; text-align: center; }
+    .trade-tally { padding: 22px 20px; }
+    .tally-head { font-size: 18px; }
+    .tally-rows .val { font-size: 17px; }
+    .tally-total .val { font-size: 28px; }
+  }
 </style>
 </head>
 <body>
@@ -521,9 +617,9 @@
     </div>
   </header>
 
-  <div class="layout">
-
-    <aside class="form-card">
+  <!-- =============== FORM VIEW =============== -->
+  <main id="formView">
+    <div class="form-card">
       <div class="form-eyebrow">Buyer's cattle</div>
       <h2 class="form-title">Build the comparison</h2>
 
@@ -574,127 +670,131 @@
       </div>
 
       <button class="generate-btn" id="generateBtn">Generate comparison</button>
-    </aside>
+    </div>
+  </main>
 
-    <main class="output-area" id="outputArea">
+  <!-- =============== RESULT VIEW =============== -->
+  <main id="resultView" style="display:none">
 
-      <div class="empty-state" id="emptyState">
-        <div class="empty-headline">Pay for what's actually there.</div>
-        <p>Enter the cattle details. We'll show you the real cost of buying through the mart versus Farm Fayre - including the recovery cost the system hides.</p>
-      </div>
+    <div class="result-controls">
+      <button class="back-btn" id="backBtn">← New comparison</button>
+      <button class="download-btn-top" id="downloadBtnTop">↓ Download image</button>
+    </div>
 
-      <div id="result" style="display:none">
+    <div class="infographic-wrap" id="infographicWrap">
+      <div class="infographic-scaler" id="infographicScaler">
+        <div class="infographic" id="infographic">
+          <div class="ig-frame">
 
-        <div class="infographic-wrap" id="infographicWrap">
-          <div class="infographic-scaler" id="infographicScaler">
-            <div class="infographic" id="infographic">
-              <div class="ig-frame">
-
-                <!-- HEADER -->
-                <div class="ig-header">
-                  <img src="/logo.png" alt="Farm Fayre">
-                  <div class="ig-tag">
-                    Market Insight · Buyer view
-                    <span class="sub" id="igWeek"></span>
-                  </div>
-                </div>
-
-                <!-- HEADLINE BLOCK -->
-                <div class="ig-head-block">
-                  <div class="ig-eyebrow" id="igEyebrow"></div>
-                  <h1 class="ig-h1" id="igH1"></h1>
-                </div>
-
-                <!-- WIN BOX -->
-                <div class="ig-win-box">
-                  <div class="ig-win-eyebrow">This trade</div>
-                  <div class="ig-win-statement" id="igWinStatement"></div>
-                  <div class="ig-win-fine" id="igWinFine"></div>
-                </div>
-
-                <!-- CARDS -->
-                <div class="ig-cards">
-
-                  <!-- FF HERO -->
-                  <div class="ig-card ff">
-                    <div class="ig-ff-badge">Pay for what's actually there</div>
-                    <div class="ig-card-top">
-                      <div>
-                        <div class="ig-label-top">Farm Fayre · Today</div>
-                        <div class="ig-label-main">Gain from day one</div>
-                      </div>
-                      <div class="ig-right-col">
-                        <div class="ig-figure"><span class="cur">€</span><span id="igFFFigure"></span><span class="unit">/ hd</span></div>
-                      </div>
-                    </div>
-                    <div class="ig-ff-detail" id="igFFDetail"></div>
-                  </div>
-
-                  <!-- MART · AVERAGE DAY -->
-                  <div class="ig-card mart dear">
-                    <div class="ig-card-top">
-                      <div>
-                        <div class="ig-label-top">Mart · Average day</div>
-                        <div class="ig-label-main">An average day at the mart</div>
-                      </div>
-                      <div class="ig-right-col">
-                        <div class="ig-figure"><span class="cur">€</span><span id="igMartAvgFigure"></span><span class="unit">/ hd</span></div>
-                        <div class="ig-sub-figure" id="igMartAvgSub"></div>
-                      </div>
-                    </div>
-                    <div class="ig-breakdown">
-                      <div class="ig-bd-small" id="igMartAvgMath"></div>
-                      <div class="ig-bd-medium" id="igMartAvgBreakdown"></div>
-                      <div class="ig-mart-tax"><span class="label">Mart Tax</span>€<span id="igMartAvgTax"></span> / hd</div>
-                    </div>
-                  </div>
-
-                  <!-- MART · GOOD DAY -->
-                  <div class="ig-card mart">
-                    <div class="ig-card-top">
-                      <div>
-                        <div class="ig-label-top">Mart · Good day</div>
-                        <div class="ig-label-main">Even on your best mart day</div>
-                      </div>
-                      <div class="ig-right-col">
-                        <div class="ig-figure"><span class="cur">€</span><span id="igMartGoodFigure"></span><span class="unit">/ hd</span></div>
-                        <div class="ig-sub-figure" id="igMartGoodSub"></div>
-                      </div>
-                    </div>
-                    <div class="ig-breakdown">
-                      <div class="ig-bd-small" id="igMartGoodMath"></div>
-                      <div class="ig-bd-medium" id="igMartGoodBreakdown"></div>
-                      <div class="ig-mart-tax"><span class="label">Mart Tax</span>€<span id="igMartGoodTax"></span> / hd</div>
-                    </div>
-                  </div>
-
-                </div>
-
-                <!-- FOOTER -->
-                <div class="ig-footer">
-                  <div class="ig-disclaimer">
-                    * 0.31kg/day differential drawn from independent third party verified data. Methodology available on request. Price comparison only; cattle quality, breeding, and trace history not factored. Figures exclude mortality, antibiotic spend, and biosecurity risk - which add €70-150/head when they hit.
-                  </div>
-                  <div class="ig-sign">
-                    <div class="ig-tagline">Pay for what's there. Gain from day one.</div>
-                    <div class="ig-url">farmfayre.com</div>
-                  </div>
-                </div>
-
+            <div class="ig-header">
+              <img src="/logo.png" alt="Farm Fayre">
+              <div class="ig-tag">
+                Market Insight · Buyer view
+                <span class="sub" id="igWeek"></span>
               </div>
             </div>
+
+            <div class="ig-head-block">
+              <div class="ig-eyebrow" id="igEyebrow"></div>
+              <h1 class="ig-h1" id="igH1"></h1>
+            </div>
+
+            <div class="ig-win-box">
+              <div class="ig-win-eyebrow" id="igWinEyebrow">This trade</div>
+              <div class="ig-win-statement" id="igWinStatement"></div>
+              <div class="ig-win-fine" id="igWinFine"></div>
+            </div>
+
+            <div class="ig-cards">
+
+              <div class="ig-card ff">
+                <div class="ig-ff-badge">Pay for what's actually there</div>
+                <div class="ig-card-top">
+                  <div>
+                    <div class="ig-label-top">Farm Fayre · Today</div>
+                    <div class="ig-label-main">Gain from day one</div>
+                  </div>
+                  <div class="ig-right-col">
+                    <div class="ig-figure"><span class="cur">€</span><span id="igFFFigure"></span><span class="unit">/ hd</span></div>
+                  </div>
+                </div>
+                <div class="ig-ff-detail" id="igFFDetail"></div>
+              </div>
+
+              <div class="ig-card mart" id="igMartAvgCard">
+                <div class="ig-card-top">
+                  <div>
+                    <div class="ig-label-top">Mart · Average day</div>
+                    <div class="ig-label-main">An average day at the mart</div>
+                  </div>
+                  <div class="ig-right-col">
+                    <div class="ig-figure"><span class="cur">€</span><span id="igMartAvgFigure"></span><span class="unit">/ hd</span></div>
+                    <div class="ig-sub-figure" id="igMartAvgSub"></div>
+                  </div>
+                </div>
+                <div class="ig-breakdown">
+                  <div class="ig-bd-small" id="igMartAvgMath"></div>
+                  <div class="ig-bd-medium" id="igMartAvgBreakdown"></div>
+                  <div class="ig-mart-tax"><span class="label" id="igMartAvgTaxLabel">Mart Tax</span>€<span id="igMartAvgTaxAmount"></span> / hd</div>
+                </div>
+              </div>
+
+              <div class="ig-card mart" id="igMartGoodCard">
+                <div class="ig-card-top">
+                  <div>
+                    <div class="ig-label-top">Mart · Good day</div>
+                    <div class="ig-label-main">Even on your best mart day</div>
+                  </div>
+                  <div class="ig-right-col">
+                    <div class="ig-figure"><span class="cur">€</span><span id="igMartGoodFigure"></span><span class="unit">/ hd</span></div>
+                    <div class="ig-sub-figure" id="igMartGoodSub"></div>
+                  </div>
+                </div>
+                <div class="ig-breakdown">
+                  <div class="ig-bd-small" id="igMartGoodMath"></div>
+                  <div class="ig-bd-medium" id="igMartGoodBreakdown"></div>
+                  <div class="ig-mart-tax"><span class="label" id="igMartGoodTaxLabel">Mart Tax</span>€<span id="igMartGoodTaxAmount"></span> / hd</div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="ig-footer">
+              <div class="ig-disclaimer">
+                * 0.31kg/day differential drawn from independent third party verified data. Methodology available on request. Price comparison only; cattle quality, breeding, and trace history not factored. Figures exclude mortality, antibiotic spend, and biosecurity risk - which add €70-150/head when they hit.
+              </div>
+              <div class="ig-sign">
+                <div class="ig-tagline">Pay for what's there. Gain from day one.</div>
+                <div class="ig-url">farmfayre.com</div>
+              </div>
+            </div>
+
           </div>
         </div>
-
-        <div class="actions">
-          <button class="action-btn primary" id="downloadBtn">↓ Download image</button>
-        </div>
-
       </div>
+    </div>
 
-    </main>
+    <!-- TRADE TALLY (page-level, not in PNG) -->
+    <div class="trade-tally" id="tradeTally">
+      <div class="tally-eyebrow">The Mart Tax</div>
+      <div class="tally-head" id="tallyHead">What does this trade cost the people who did the actual work?</div>
+      <div class="tally-rows">
+        <span class="lbl">Seller's lost weight<span class="sub">FF pays for 97.5% of the kg, mart pays for 93.75%</span></span>
+        <span class="val" id="tallySeller">€0</span>
+        <span class="lbl">Buyer's hidden costs<span class="sub">Phantom weight + agent cost + foregone gain</span></span>
+        <span class="val" id="tallyBuyer">€0</span>
+      </div>
+      <div class="tally-total">
+        <span class="lbl">Total extracted from this trade</span>
+        <span class="val" id="tallyTotal">€0</span>
+      </div>
+      <div class="tally-frame">Farm Fayre returns this to the people doing the work.</div>
+      <div class="tally-fine">Based on Mart Average Day scenario. Excludes mart commission (3-4%), transport, withholding period, mortality risk, and biosecurity exposure - which add to the real system cost.</div>
+    </div>
 
-  </div>
+    <button class="download-btn-bottom" id="downloadBtnBottom">↓ Download image</button>
+
+  </main>
 
   <footer class="footer-line">
     <a href="/seller/" class="other-side">See the seller's side</a>
@@ -705,25 +805,14 @@
 
 <script>
 // =============================================================================
-// Farm Fayre Buyer Calculator - v2 (locked math + new visual design)
-// =============================================================================
-//
-// LOCKED CONSTANTS:
-//   FF pay-for ratio:          0.975 (97.5% of pre-movement weight)
-//   Mart ring ratio:           0.9375 (6.25% farm-to-ring shrink)
-//   Mart landed (good day):    0.93 of pre-movement
-//   Mart landed (avg day):     0.92 of pre-movement
-//   Agent cost:                €20 / head
-//   Foregone gain:             0.31 × 70 × m × min(1, W/500)
-//     - 70-day window = conservative floor of verified 70-100 day range
-//     - W/500 scales smaller-cattle proportionally; caps at 500kg reference
+// Farm Fayre Buyer Calculator - v3
+// View-switching · Conditional Win Box · Conditional Mart Tax/Premium · Trade Tally
 // =============================================================================
 
 let MARKET = null;
 let lastResult = null;
 let selectedSex = 'male';
 
-// ---- Number / date helpers ----
 function formatMoney(n) {
   if (n === null || n === undefined || isNaN(n)) return '0';
   return Math.round(n).toLocaleString('en-IE');
@@ -731,7 +820,6 @@ function formatMoney(n) {
 function fmtPriceKg(n) { return n.toFixed(2); }
 
 function fmtSundayWeekEnd(dateStr) {
-  // Source is Monday week-ending; display the prior Sunday for human reading.
   const monday = new Date(dateStr);
   const sunday = new Date(monday); sunday.setDate(monday.getDate() - 1);
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -789,7 +877,6 @@ document.getElementById('category').addEventListener('change', e => {
 document.getElementById('breed').addEventListener('change', updateHint);
 document.getElementById('weight').addEventListener('input', updateHint);
 
-// ---- Band lookup with edge blending (preserved from v1) ----
 function findBandPrice(breedBands, weight) {
   const bands = Object.keys(breedBands);
   if (!bands.length) return null;
@@ -820,11 +907,7 @@ function findBandPrice(breedBands, weight) {
   const adjCurrent = adjPrices && adjPrices[adjPrices.length - 1];
   if (adjCurrent == null) return { mean: insideCurrent, bandName: inside.band, blended: false };
   if (insideCurrent == null) return { mean: adjCurrent, bandName: adjacent.band, blended: false };
-  return {
-    mean: (insideCurrent + adjCurrent) / 2,
-    bandName: inside.band + ' & ' + adjacent.band,
-    blended: true
-  };
+  return { mean: (insideCurrent + adjCurrent) / 2, bandName: inside.band + ' & ' + adjacent.band, blended: true };
 }
 
 function updateHint() {
@@ -853,71 +936,81 @@ function updateHint() {
 
 // ---- LOCKED BUYER MATH ----
 function computeBuyer(weight, mean, ffBid, headCount) {
-  // FF side
   const ffPayWeight = weight * 0.975;
   const ffPerHead   = ffPayWeight * ffBid;
-
-  // Mart side - common
   const ringWeight  = weight * 0.9375;
   const martHeadline = ringWeight * mean;
-
-  // Mart phantom-weight cost (overpayment vs what actually lands)
-  // Good day: lands at 93% → phantom = (0.9375 - 0.93) × W × m = 0.0075 × W × m
-  // Avg day:  lands at 92% → phantom = (0.9375 - 0.92)  × W × m = 0.0175 × W × m
   const phantomGood = weight * 0.0075 * mean;
   const phantomAvg  = weight * 0.0175 * mean;
-
-  // Agent cost
   const agentCost = 20;
-
-  // Foregone gain - scales with W up to 500kg cap
   const foregoneGain = 0.31 * 70 * mean * Math.min(1, weight / 500);
-
-  // Mart all-in per head
   const martGoodPerHead = martHeadline + phantomGood + agentCost + foregoneGain;
   const martAvgPerHead  = martHeadline + phantomAvg  + agentCost + foregoneGain;
-
-  // Mart Tax
   const martGoodTax = martGoodPerHead - ffPerHead;
   const martAvgTax  = martAvgPerHead  - ffPerHead;
-
-  // Phantom weight rounded for breakdown display
   const landedGoodKg = Math.round(weight * 0.93);
   const landedAvgKg  = Math.round(weight * 0.92);
-
+  // Seller-side loss in the Mart system: pay-weight differential at mart mean
+  const sellerLostPerHead = weight * 0.0375 * mean;
+  // Buyer-side overhead in the Mart system (using avg day): phantom + agent + foregone
+  const buyerLostPerHead = phantomAvg + agentCost + foregoneGain;
   return {
     weight, mean, ffBid, headCount,
-    ffPayWeight, ffPerHead,
-    ringWeight, martHeadline,
-    phantomGood, phantomAvg,
-    agentCost, foregoneGain,
+    ffPayWeight, ffPerHead, ringWeight, martHeadline,
+    phantomGood, phantomAvg, agentCost, foregoneGain,
     martGoodPerHead, martAvgPerHead,
     martGoodTax, martAvgTax,
     landedGoodKg, landedAvgKg,
-    // Totals across headcount
-    ffTotal:        ffPerHead * headCount,
-    martGoodTotal:  martGoodPerHead * headCount,
-    martAvgTotal:   martAvgPerHead  * headCount,
+    sellerLostPerHead, buyerLostPerHead,
+    ffTotal: ffPerHead * headCount,
+    martGoodTotal: martGoodPerHead * headCount,
+    martAvgTotal:  martAvgPerHead  * headCount,
     martGoodTaxTotal: martGoodTax * headCount,
     martAvgTaxTotal:  martAvgTax  * headCount,
+    sellerLostTotal: sellerLostPerHead * headCount,
+    buyerLostTotal:  buyerLostPerHead  * headCount,
   };
 }
 
-// ---- Dynamic headline sizing for variable-length names ----
 function fitHeadline(elem, maxWidth, baseSize, minSize) {
   let size = baseSize;
   elem.style.fontSize = size + 'px';
   elem.style.whiteSpace = 'nowrap';
-  // Force layout reads in a loop
   while (elem.scrollWidth > maxWidth && size > minSize) {
     size -= 2;
     elem.style.fontSize = size + 'px';
   }
-  // If still too wide at min, allow wrap to 2 lines and ease font slightly
-  if (elem.scrollWidth > maxWidth) {
-    elem.style.whiteSpace = 'normal';
+  if (elem.scrollWidth > maxWidth) elem.style.whiteSpace = 'normal';
+}
+
+// ---- View switching ----
+function showResultView() {
+  document.getElementById('formView').style.display = 'none';
+  document.getElementById('resultView').style.display = 'block';
+  window.scrollTo(0, 0);
+  if (location.hash !== '#result') {
+    history.pushState({view: 'result'}, '', '#result');
   }
 }
+function showFormView() {
+  document.getElementById('resultView').style.display = 'none';
+  document.getElementById('formView').style.display = 'block';
+  window.scrollTo(0, 0);
+  if (location.hash === '#result') {
+    history.pushState({view: 'form'}, '', window.location.pathname);
+  }
+}
+window.addEventListener('popstate', () => {
+  if (location.hash === '#result' && lastResult) {
+    document.getElementById('formView').style.display = 'none';
+    document.getElementById('resultView').style.display = 'block';
+  } else {
+    document.getElementById('resultView').style.display = 'none';
+    document.getElementById('formView').style.display = 'block';
+  }
+});
+
+document.getElementById('backBtn').addEventListener('click', showFormView);
 
 // ---- Generate ----
 document.getElementById('generateBtn').addEventListener('click', () => {
@@ -948,31 +1041,33 @@ document.getElementById('generateBtn').addEventListener('click', () => {
 
   lastResult = { input: { selectedSex, cat, breed, weight, headCount, ffBid, buyerName, subLabel }, mean, ...result };
 
-  // ---- Render ----
-  document.getElementById('emptyState').style.display = 'none';
-  document.getElementById('result').style.display = 'block';
-
   document.getElementById('igWeek').textContent = 'Week ending ' + fmtSundayWeekEnd(MARKET.week_ending);
   document.getElementById('igEyebrow').textContent = headCount + ' HEAD · ' + breed + ' ' + subDisplayUpper + ' · ' + weight + 'KG ON FARM';
 
-  // Headline
   const h1 = document.getElementById('igH1');
   if (buyerName) {
     h1.innerHTML = "What's in <em>" + escapeHTML(buyerName) + "'s</em> yard?";
   } else {
     h1.innerHTML = "What's in <em>your</em> yard?";
   }
-  // Container is 1080 - 140 padding = 940px wide. Fit headline; scales down for long names.
   fitHeadline(h1, 940, 90, 56);
 
-  // Win Box
-  const lowSave  = result.martGoodTaxTotal;  // smaller saving (vs good day)
-  const highSave = result.martAvgTaxTotal;   // larger saving (vs avg day)
-  document.getElementById('igWinStatement').innerHTML =
-    'Farm Fayre puts an extra <span class="amount">€' + formatMoney(lowSave) +
-    ' - €' + formatMoney(highSave) + '</span> in your pocket.';
-  document.getElementById('igWinFine').textContent =
-    'Across ' + headCount + ' head · vs Mart trade';
+  // ---- Conditional Win Box ----
+  const lowSave  = result.martGoodTaxTotal;
+  const highSave = result.martAvgTaxTotal;
+  let winStatement = '';
+  if (lowSave > 0 && highSave > 0) {
+    // Normal: FF wins both scenarios
+    winStatement = 'Farm Fayre puts an extra <span class="amount">€' + formatMoney(lowSave) + ' - €' + formatMoney(highSave) + '</span> in your pocket.';
+  } else if (highSave > 0) {
+    // FF beats avg only
+    winStatement = 'Farm Fayre puts up to <span class="amount">€' + formatMoney(highSave) + '</span> in your pocket vs an average mart day.';
+  } else {
+    // Rare: FF doesn't beat any mart scenario (bid too high)
+    winStatement = 'Farm Fayre offers <span class="amount">certainty</span> - no shrink, no agent, no recovery debt.';
+  }
+  document.getElementById('igWinStatement').innerHTML = winStatement;
+  document.getElementById('igWinFine').textContent = 'Across ' + headCount + ' head · vs Mart trade';
 
   // FF Card
   document.getElementById('igFFFigure').textContent = formatMoney(result.ffPerHead);
@@ -980,32 +1075,64 @@ document.getElementById('generateBtn').addEventListener('click', () => {
     '<strong>' + result.ffPayWeight.toFixed(0) + 'kg pay-weight × €' + fmtPriceKg(ffBid) + '/kg.</strong> ' +
     'Cattle settle at pre-movement weight within days. Performing from day one. No agent. No recovery debt.';
 
-  // Mart Average Day
-  document.getElementById('igMartAvgFigure').textContent = formatMoney(result.martAvgPerHead);
-  document.getElementById('igMartAvgSub').textContent =
-    'Real cost above Farm Fayre +€' + formatMoney(result.martAvgTax) + '/hd';
-  document.getElementById('igMartAvgMath').innerHTML =
-    result.ringWeight.toFixed(0) + 'kg ring × €' + fmtPriceKg(mean) + '/kg = <strong>€' + formatMoney(result.martHeadline) + '</strong>';
-  document.getElementById('igMartAvgBreakdown').innerHTML =
-    'Lands at <strong>' + result.landedAvgKg + 'kg</strong> = <strong>€' + formatMoney(result.phantomAvg) +
-    '</strong> not in your yard · <strong>€' + result.agentCost + '</strong> agent cost · <strong>€' +
-    formatMoney(result.foregoneGain) + '</strong> weight debt recovery';
-  document.getElementById('igMartAvgTax').textContent = formatMoney(result.martAvgTax);
+  // Mart Avg
+  renderMartCard({
+    figureId: 'igMartAvgFigure', subId: 'igMartAvgSub',
+    mathId: 'igMartAvgMath', breakdownId: 'igMartAvgBreakdown',
+    taxLabelId: 'igMartAvgTaxLabel', taxAmountId: 'igMartAvgTaxAmount',
+    cardId: 'igMartAvgCard',
+    perHead: result.martAvgPerHead, taxPerHead: result.martAvgTax,
+    ringKg: result.ringWeight, mean: mean, martHeadline: result.martHeadline,
+    landedKg: result.landedAvgKg, phantom: result.phantomAvg,
+    agent: result.agentCost, foregone: result.foregoneGain
+  });
 
-  // Mart Good Day
-  document.getElementById('igMartGoodFigure').textContent = formatMoney(result.martGoodPerHead);
-  document.getElementById('igMartGoodSub').textContent =
-    'Real cost above Farm Fayre +€' + formatMoney(result.martGoodTax) + '/hd';
-  document.getElementById('igMartGoodMath').innerHTML =
-    result.ringWeight.toFixed(0) + 'kg ring × €' + fmtPriceKg(mean) + '/kg = <strong>€' + formatMoney(result.martHeadline) + '</strong>';
-  document.getElementById('igMartGoodBreakdown').innerHTML =
-    'Lands at <strong>' + result.landedGoodKg + 'kg</strong> = <strong>€' + formatMoney(result.phantomGood) +
-    '</strong> not in your yard · <strong>€' + result.agentCost + '</strong> agent cost · <strong>€' +
-    formatMoney(result.foregoneGain) + '</strong> weight debt recovery';
-  document.getElementById('igMartGoodTax').textContent = formatMoney(result.martGoodTax);
+  // Mart Good
+  renderMartCard({
+    figureId: 'igMartGoodFigure', subId: 'igMartGoodSub',
+    mathId: 'igMartGoodMath', breakdownId: 'igMartGoodBreakdown',
+    taxLabelId: 'igMartGoodTaxLabel', taxAmountId: 'igMartGoodTaxAmount',
+    cardId: 'igMartGoodCard',
+    perHead: result.martGoodPerHead, taxPerHead: result.martGoodTax,
+    ringKg: result.ringWeight, mean: mean, martHeadline: result.martHeadline,
+    landedKg: result.landedGoodKg, phantom: result.phantomGood,
+    agent: result.agentCost, foregone: result.foregoneGain
+  });
 
+  // Trade Tally
+  document.getElementById('tallySeller').textContent = '€' + formatMoney(result.sellerLostTotal);
+  document.getElementById('tallyBuyer').textContent  = '€' + formatMoney(result.buyerLostTotal);
+  document.getElementById('tallyTotal').textContent  = '€' + formatMoney(result.sellerLostTotal + result.buyerLostTotal);
+
+  showResultView();
   scaleInfographic();
 });
+
+function renderMartCard(o) {
+  document.getElementById(o.figureId).textContent = formatMoney(o.perHead);
+  document.getElementById(o.mathId).innerHTML =
+    o.ringKg.toFixed(0) + 'kg ring × €' + fmtPriceKg(o.mean) + '/kg = <strong>€' + formatMoney(o.martHeadline) + '</strong>';
+  document.getElementById(o.breakdownId).innerHTML =
+    'Lands at <strong>' + o.landedKg + 'kg</strong> = <strong>€' + formatMoney(o.phantom) +
+    '</strong> not in your yard · <strong>€' + o.agent + '</strong> agent cost · <strong>€' +
+    formatMoney(o.foregone) + '</strong> weight debt recovery';
+
+  const card = document.getElementById(o.cardId);
+  card.classList.remove('dear', 'upside');
+  if (o.taxPerHead > 0) {
+    // Mart costs more than FF - amber stripe, "Mart Tax"
+    card.classList.add('dear');
+    document.getElementById(o.subId).textContent = 'Real cost above Farm Fayre +€' + formatMoney(o.taxPerHead) + '/hd';
+    document.getElementById(o.taxLabelId).textContent = 'Mart Tax';
+    document.getElementById(o.taxAmountId).textContent = formatMoney(o.taxPerHead);
+  } else {
+    // Mart costs less than FF (rare) - green stripe, "Mart Saving"
+    card.classList.add('upside');
+    document.getElementById(o.subId).textContent = '€' + formatMoney(Math.abs(o.taxPerHead)) + '/hd below Farm Fayre';
+    document.getElementById(o.taxLabelId).textContent = 'Mart Saving';
+    document.getElementById(o.taxAmountId).textContent = formatMoney(Math.abs(o.taxPerHead));
+  }
+}
 
 function scaleInfographic() {
   const wrap = document.getElementById('infographicWrap');
@@ -1058,8 +1185,8 @@ async function renderToPNG() {
   }
 }
 
-document.getElementById('downloadBtn').addEventListener('click', async () => {
-  const btn = document.getElementById('downloadBtn');
+async function handleDownload(btn) {
+  const originalText = btn.textContent;
   btn.disabled = true; btn.textContent = 'Rendering...';
   try {
     const blob = await renderToPNG();
@@ -1074,9 +1201,11 @@ document.getElementById('downloadBtn').addEventListener('click', async () => {
   } catch (e) {
     alert('Could not render. Please try again.');
   } finally {
-    btn.disabled = false; btn.textContent = '↓ Download image';
+    btn.disabled = false; btn.textContent = originalText;
   }
-});
+}
+document.getElementById('downloadBtnTop').addEventListener('click', e => handleDownload(e.target));
+document.getElementById('downloadBtnBottom').addEventListener('click', e => handleDownload(e.target));
 </script>
 
 </body>
