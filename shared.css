@@ -152,3 +152,15 @@ body::before {
   letter-spacing: 0.08em;
   color: var(--brand-grey-light);
 }
+
+/* ==========================================================================
+   MOBILE STICKY FIX
+   On narrow viewports, layout stacks single-column. Sticky form-card would
+   glue to the top and let the infographic slide under it. Disable sticky.
+   ========================================================================== */
+@media (max-width: 980px) {
+  .form-card {
+    position: static !important;
+    top: auto !important;
+  }
+}
