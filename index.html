@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Farm Fayre - Cattle Price Tools</title>
+<title>Farm Fayre - Cattle Value Tools</title>
 <meta name="description" content="See what Farm Fayre means for you. Selling cattle or buying cattle - real numbers, real comparison.">
 <link rel="stylesheet" href="/shared.css">
 <style>
@@ -13,12 +13,12 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 32px 0;
+    padding: 24px 0;
   }
 
   .landing-hero {
     text-align: center;
-    margin-bottom: 48px;
+    margin-bottom: 40px;
   }
 
   .landing-eyebrow {
@@ -48,10 +48,11 @@
   }
 
   .landing-sub {
-    margin-top: 22px;
-    font-size: 18px;
+    margin-top: 32px;
+    text-align: center;
+    font-size: 17px;
     color: var(--brand-grey);
-    max-width: 600px;
+    max-width: 640px;
     margin-left: auto;
     margin-right: auto;
     line-height: 1.55;
@@ -68,8 +69,10 @@
 
   .tile {
     position: relative;
-    display: block;
-    padding: 40px 36px 36px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 36px 36px 32px;
     border-radius: 6px;
     text-decoration: none;
     color: inherit;
@@ -77,10 +80,7 @@
     border: 1px solid var(--rule);
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
     overflow: hidden;
-    min-height: 260px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    min-height: 220px;
   }
 
   .tile::before {
@@ -100,17 +100,7 @@
     border-color: var(--brand-green);
   }
 
-  .tile:hover::before {
-    transform: scaleX(1);
-  }
-
-  .tile-top {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 20px;
-  }
+  .tile:hover::before { transform: scaleX(1); }
 
   .tile-icon {
     width: 56px;
@@ -122,6 +112,7 @@
     justify-content: center;
     color: var(--brand-blue);
     flex-shrink: 0;
+    margin-bottom: 20px;
   }
 
   .tile-icon svg {
@@ -132,17 +123,6 @@
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
-  }
-
-  .tile-arrow {
-    color: var(--brand-grey-light);
-    font-size: 22px;
-    transition: transform 0.2s ease, color 0.2s ease;
-  }
-
-  .tile:hover .tile-arrow {
-    transform: translateX(4px);
-    color: var(--brand-green-dark);
   }
 
   .tile-eyebrow {
@@ -170,11 +150,28 @@
     line-height: 1.6;
   }
 
+  /* Footer link */
+  .footer-line a.farmfayre-link {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    color: var(--brand-blue);
+    font-size: 12px;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-bottom-color 0.15s ease;
+  }
+  .footer-line a.farmfayre-link:hover {
+    border-bottom-color: var(--brand-green);
+  }
+
   /* Mobile */
   @media (max-width: 720px) {
-    .landing-hero { margin-bottom: 36px; }
-    .tile { padding: 30px 24px 28px; min-height: 0; }
+    .landing-hero { margin-bottom: 30px; }
+    .tile { padding: 28px 24px 26px; min-height: 0; }
     .tile-headline { font-size: 26px; }
+    .landing-sub { margin-top: 24px; font-size: 15px; }
   }
 </style>
 </head>
@@ -185,10 +182,9 @@
   <header class="topbar">
     <a href="/" class="brand" style="text-decoration:none;color:inherit">
       <img src="/logo.png" alt="Farm Fayre">
-      <span class="brand-title">Farm Fayre<em></em></span>
     </a>
     <div class="topbar-meta">
-      Cattle Price Tools
+      Cattle Value Tools
       <span class="sub" id="dataWeek">Loading...</span>
     </div>
   </header>
@@ -198,18 +194,13 @@
     <div class="landing-hero">
       <div class="landing-eyebrow">Both sides of every trade</div>
       <h1 class="landing-h1">Farm Fayre serves <em>both sides</em><br>of every trade.</h1>
-      <p class="landing-sub">See what it means for you - whether you're moving cattle off the farm or bringing them on.</p>
     </div>
 
     <div class="tiles">
       <a class="tile" href="/seller/">
         <div>
-          <div class="tile-top">
-            <div class="tile-icon" aria-hidden="true">
-              <!-- Outgoing arrow icon -->
-              <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
-            </div>
-            <div class="tile-arrow">→</div>
+          <div class="tile-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
           </div>
           <div class="tile-eyebrow">For sellers</div>
           <div class="tile-headline">I'm selling cattle</div>
@@ -219,43 +210,41 @@
 
       <a class="tile" href="/buyer/">
         <div>
-          <div class="tile-top">
-            <div class="tile-icon" aria-hidden="true">
-              <!-- Incoming arrow icon -->
-              <svg viewBox="0 0 24 24"><path d="M19 12H6M11 6l-6 6 6 6"/></svg>
-            </div>
-            <div class="tile-arrow">→</div>
+          <div class="tile-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M19 12H6M11 6l-6 6 6 6"/></svg>
           </div>
           <div class="tile-eyebrow">For buyers</div>
           <div class="tile-headline">I'm buying cattle</div>
         </div>
-        <p class="tile-body">Compare what you actually pay for. Pre-movement weight, performance from day one, recovery cost the mart hides.</p>
+        <p class="tile-body">Compare what you actually pay for. Pre-movement weight, performance from day one, the mart tax the system hides.</p>
       </a>
     </div>
+
+    <p class="landing-sub">See what it means for you - whether you're moving cattle off the farm or bringing them on.</p>
 
   </main>
 
   <footer class="footer-line">
     <span class="footer-attr">Farm Fayre Weekly Aggregate Pricing. National trade, aggregated and rounded. Updated Sundays.</span>
-    <span style="font-family:'Poppins',sans-serif;font-weight:500;letter-spacing:0.16em;color:var(--brand-blue);font-size:12px;text-transform:uppercase">farmfayre.com</span>
+    <a href="https://farmfayre.com" class="farmfayre-link" target="_blank" rel="noopener">farmfayre.com</a>
   </footer>
 
 </div>
 
 <script>
-  // Pull week-ending date from the public market data
+  // Pull week-ending date from the public market data and display the prior Sunday
   (async function() {
     try {
       const r = await fetch('/market_data.json?t=' + Date.now(), { cache: 'no-store' });
       if (!r.ok) throw new Error('fetch failed');
       const data = await r.json();
-      const we = data.week_ending; // e.g. "2026-04-27" (Monday)
+      const we = data.week_ending; // e.g. "2026-05-11" (Monday)
       if (we) {
-        const d = new Date(we);
-        // Display week as "WEEK ENDING DD MMM YYYY"
+        const monday = new Date(we);
+        const sunday = new Date(monday); sunday.setDate(monday.getDate() - 1);
         const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         document.getElementById('dataWeek').textContent =
-          'Week ending ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+          'Week ending ' + sunday.getDate() + ' ' + months[sunday.getMonth()] + ' ' + sunday.getFullYear();
       }
     } catch (e) {
       document.getElementById('dataWeek').textContent = 'Latest market data';
