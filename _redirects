@@ -1,0 +1,9 @@
+# Farm Fayre calc site - Netlify redirects
+# (none needed for current deployment - / is now the landing toggle)
+
+# If anyone shared a /calc URL in the past, redirect to seller
+/calc /seller/ 301
+/calc/ /seller/ 301
+
+# Backward compat: old root used to be the seller calc directly
+# If someone bookmarked a deep URL with form values as hash, those still work on landing
