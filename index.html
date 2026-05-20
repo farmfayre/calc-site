@@ -181,9 +181,12 @@
       const data = await r.json();
       const we = data.week_ending;
       if (we) {
-        // JSON contains Sunday; display Saturday week-ending = Sunday - 1
-        const sundayDate = new Date(we);
-        const saturday = new Date(sundayDate); saturday.setDate(sundayDate.getDate() - 1);
+        // Find most recent Saturday on or before JSON date, regardless of which
+        // day-of-week is stored. (Sun:1, Mon:2, Tue:3, ..., Sat:0)
+        const d = new Date(we);
+        const daysBack = (d.getDay() + 1) % 7;
+        const saturday = new Date(d);
+        saturday.setDate(d.getDate() - daysBack);
         const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         document.getElementById('dataWeek').textContent =
           'Week ending ' + saturday.getDate() + ' ' + months[saturday.getMonth()] + ' ' + saturday.getFullYear();
