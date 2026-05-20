@@ -4,21 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Farm Fayre - Cattle Value Tools</title>
-<meta name="description" content="See what Farm Fayre means for you. Selling cattle or buying cattle - real numbers, real comparison.">
+<meta name="description" content="Every trade has two sides. Pick yours and see your trade priced honestly - full daylight.">
 <link rel="stylesheet" href="/shared.css">
 <style>
-  .landing {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 16px 0 0;
-  }
+  .landing { display: flex; flex-direction: column; justify-content: center; padding: 16px 0 0; }
 
-  .landing-hero {
-    text-align: center;
-    margin-bottom: 32px;
-  }
-
+  .landing-hero { text-align: center; margin-bottom: 28px; }
   .landing-h1 {
     font-family: 'Poppins', sans-serif;
     font-weight: 500;
@@ -30,21 +21,20 @@
     max-width: 880px;
     margin: 0 auto;
   }
-  .landing-h1 em {
-    font-style: italic;
-    color: var(--brand-green-dark);
-  }
+  .landing-h1 em { font-style: italic; color: var(--brand-green-dark); }
 
   .landing-sub {
-    margin-top: 28px;
+    margin: 26px auto 0;
     text-align: center;
-    font-size: 16px;
-    color: var(--brand-grey);
-    max-width: 620px;
-    margin-left: auto;
-    margin-right: auto;
-    line-height: 1.55;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
+    font-size: 19px;
+    color: var(--brand-blue);
+    max-width: 720px;
+    line-height: 1.5;
+    letter-spacing: -0.005em;
   }
+  .landing-sub strong { font-weight: 500; color: var(--brand-green-dark); font-style: italic; }
 
   .tiles {
     display: grid;
@@ -126,30 +116,15 @@
   }
   .footer-line a.farmfayre-link:hover { border-bottom-color: var(--brand-green); }
 
-  /* Mobile - tight fit, both tiles + headline visible without scrolling */
   @media (max-width: 720px) {
     .landing { padding: 8px 0 0; }
-    .landing-hero { margin-bottom: 22px; }
-    .landing-h1 {
-      font-size: 30px;
-      line-height: 1.08;
-    }
+    .landing-hero { margin-bottom: 18px; }
+    .landing-h1 { font-size: 30px; line-height: 1.08; }
+    .landing-sub { font-size: 16px; margin-top: 18px; }
     .tiles { gap: 14px; }
-    .tile {
-      padding: 22px 24px 22px;
-      min-height: 140px;
-    }
+    .tile { padding: 22px 24px 22px; min-height: 140px; }
     .tile-headline { font-size: 24px; }
-    .tile-body {
-      margin-top: 10px;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-    .landing-sub {
-      margin-top: 20px;
-      font-size: 14px;
-      line-height: 1.5;
-    }
+    .tile-body { margin-top: 10px; font-size: 13px; line-height: 1.5; }
   }
 </style>
 </head>
@@ -177,22 +152,22 @@
       <a class="tile" href="/seller/">
         <div class="tile-eyebrow">For sellers</div>
         <div class="tile-headline">I'm selling cattle</div>
-        <p class="tile-body">See your Farm Fayre offer against the realistic mart distribution. Top 20%, average, bottom 20%.</p>
+        <p class="tile-body">Compare your Farm Fayre offer with current mart prices.</p>
       </a>
 
       <a class="tile" href="/buyer/">
         <div class="tile-eyebrow">For buyers</div>
         <div class="tile-headline">I'm buying cattle</div>
-        <p class="tile-body">Compare what you actually pay for. Pre-movement weight, performance from day one, the mart tax the system hides.</p>
+        <p class="tile-body">Compare what you actually get versus what you paid for.</p>
       </a>
     </div>
 
-    <p class="landing-sub">See what it means for you - moving cattle off the farm or bringing them on.</p>
+    <p class="landing-sub">Every trade has two sides. <strong>In 30 seconds,</strong> see your trade priced honestly - both sides, full daylight.</p>
 
   </main>
 
   <footer class="footer-line">
-    <span class="footer-attr">Farm Fayre Weekly Aggregate Pricing. National trade, aggregated and rounded. Updated Sundays.</span>
+    <span class="footer-attr">Farm Fayre Weekly Aggregate Pricing. Updated Sundays.</span>
     <a href="https://farmfayre.com" class="farmfayre-link" target="_blank" rel="noopener">farmfayre.com</a>
   </footer>
 
@@ -206,11 +181,12 @@
       const data = await r.json();
       const we = data.week_ending;
       if (we) {
-        const monday = new Date(we);
-        const sunday = new Date(monday); sunday.setDate(monday.getDate() - 1);
+        // JSON contains Sunday; display Saturday week-ending = Sunday - 1
+        const sundayDate = new Date(we);
+        const saturday = new Date(sundayDate); saturday.setDate(sundayDate.getDate() - 1);
         const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         document.getElementById('dataWeek').textContent =
-          'Week ending ' + sunday.getDate() + ' ' + months[sunday.getMonth()] + ' ' + sunday.getFullYear();
+          'Week ending ' + saturday.getDate() + ' ' + months[saturday.getMonth()] + ' ' + saturday.getFullYear();
       }
     } catch (e) {
       document.getElementById('dataWeek').textContent = 'Latest market data';
