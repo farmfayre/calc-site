@@ -634,9 +634,13 @@ function formatMoney(n) {
 function fmtPriceKg(n) { return n.toFixed(2); }
 
 function fmtSaturdayWeekEnd(dateStr) {
-  // JSON contains Sunday; we display Saturday (Sunday - 1)
-  const sunday = new Date(dateStr);
-  const saturday = new Date(sunday); saturday.setDate(sunday.getDate() - 1);
+  // Find the most recent Saturday on or before the JSON date, regardless of
+  // whether week_ending stores Sat/Sun/Mon. JS Date.getDay(): Sun=0, Sat=6.
+  // daysToSubtract = (dayOfWeek + 1) % 7  →  Sat:0, Sun:1, Mon:2, Tue:3 ...
+  const d = new Date(dateStr);
+  const daysBack = (d.getDay() + 1) % 7;
+  const saturday = new Date(d);
+  saturday.setDate(d.getDate() - daysBack);
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   return saturday.getDate() + ' ' + months[saturday.getMonth()] + ' ' + saturday.getFullYear();
 }
