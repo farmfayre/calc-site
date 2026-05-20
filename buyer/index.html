@@ -8,6 +8,10 @@
 <link rel="stylesheet" href="/shared.css">
 <script src="/html2canvas.min.js" defer></script>
 <style>
+  /* Hide page topbar in result view - infographic carries its own branding */
+  body.view-result .topbar { display: none; }
+  body.view-result .page { padding-top: 14px; }
+
   /* ============================================================
      FORM VIEW
      ============================================================ */
@@ -118,24 +122,24 @@
   .result-top {
     display: flex;
     justify-content: flex-start;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
   }
   .back-link {
     background: none;
     border: none;
-    color: var(--brand-blue);
+    color: var(--brand-grey);
     font-family: 'Carlito', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    padding: 6px 0;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    padding: 2px 0;
     cursor: pointer;
     text-decoration: none;
     border-bottom: 1px solid transparent;
-    transition: border-bottom-color 0.15s ease;
+    transition: color 0.15s ease, border-bottom-color 0.15s ease;
   }
-  .back-link:hover { border-bottom-color: var(--brand-green); }
+  .back-link:hover { color: var(--brand-blue); border-bottom-color: var(--brand-green); }
 
   .infographic-wrap { position: relative; max-width: 800px; margin: 0 auto; }
   .infographic-scaler { transform-origin: top left; }
@@ -345,6 +349,17 @@
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
   }
+  /* Total row - prominent */
+  .tally-row.total {
+    border-top: 2px solid var(--brand-blue);
+    border-bottom: none;
+    margin-top: 8px;
+    padding-top: 18px;
+    padding-bottom: 6px;
+  }
+  .tally-row.total .lbl-main { color: var(--brand-blue); font-size: 14px; }
+  .tally-row.total .lbl-cap { color: var(--brand-grey); font-style: normal; font-weight: 700; font-size: 13px; letter-spacing: 0.02em; }
+  .tally-row.total .val { font-size: 38px; font-weight: 700; color: var(--brand-blue); }
   .tally-frame {
     margin-top: 18px;
     padding: 12px 16px;
@@ -517,7 +532,7 @@
               <div class="ig-card mart" id="igMartAvgCard">
                 <div class="ig-card-top">
                   <div>
-                    <div class="ig-label-top">Mart &middot; Average day</div>
+                    <div class="ig-label-top">An average day at the mart</div>
                     <div class="ig-label-main" id="igMartAvgMainLabel">Mart - Average day</div>
                   </div>
                   <div class="ig-right-col">
@@ -535,7 +550,7 @@
               <div class="ig-card mart" id="igMartGoodCard">
                 <div class="ig-card-top">
                   <div>
-                    <div class="ig-label-top">Mart &middot; Good day</div>
+                    <div class="ig-label-top">Even on your best mart day</div>
                     <div class="ig-label-main" id="igMartGoodMainLabel">Mart - Good day</div>
                   </div>
                   <div class="ig-right-col">
@@ -859,12 +874,14 @@ function fitOneLine(elem, maxWidth, baseSize, minSize) {
 function showResultView() {
   document.getElementById('formView').style.display = 'none';
   document.getElementById('resultView').style.display = 'block';
+  document.body.classList.add('view-result');
   window.scrollTo(0, 0);
   if (location.hash !== '#result') history.pushState({view:'result'}, '', '#result');
 }
 function showFormView() {
   document.getElementById('resultView').style.display = 'none';
   document.getElementById('formView').style.display = 'block';
+  document.body.classList.remove('view-result');
   window.scrollTo(0, 0);
   if (location.hash === '#result') history.pushState({view:'form'}, '', window.location.pathname);
 }
@@ -872,9 +889,11 @@ window.addEventListener('popstate', () => {
   if (location.hash === '#result' && lastResult) {
     document.getElementById('formView').style.display = 'none';
     document.getElementById('resultView').style.display = 'block';
+    document.body.classList.add('view-result');
   } else {
     document.getElementById('resultView').style.display = 'none';
     document.getElementById('formView').style.display = 'block';
+    document.body.classList.remove('view-result');
   }
 });
 document.getElementById('backBtn').addEventListener('click', showFormView);
@@ -1012,11 +1031,22 @@ function renderTally(a) {
   html += rowHTML(scenarios.seller.label, scenarios.seller.value, scenarios.seller.caption);
 
   // Buyer row - show only if positive
+  let total = scenarios.seller.value;
   if (scenarios.buyer.value > 0) {
     html += rowHTML(scenarios.buyer.label, scenarios.buyer.value, scenarios.buyer.caption);
+    total += scenarios.buyer.value;
   } else {
     html += rowHTML(scenarios.buyer.label, 0, 'Farm Fayre and mart are comparable for the buyer at this price level');
   }
+
+  const perHead = total / a.N;
+  html += '<div class="tally-row total">' +
+    '<div class="lbl">' +
+      '<div class="lbl-main">Total mart tax</div>' +
+      '<div class="lbl-cap">\u20AC' + formatMoney(perHead) + ' per head</div>' +
+    '</div>' +
+    '<div class="val">\u20AC' + formatMoney(total) + '</div>' +
+  '</div>';
 
   body.innerHTML = html;
 }
