@@ -466,7 +466,7 @@
       </div>
 
       <div class="field">
-        <label for="ffBid">Agreed Farm Fayre price <span class="opt">&euro;/kg</span><span class="info-tip" data-tip="This is the Farm Fayre buyer bid offer">i</span></label>
+        <label for="ffBid">Farm Fayre Bid Price <span class="opt">&euro;/kg</span><span class="info-tip" data-tip="This is the Farm Fayre buyer bid offer">i</span></label>
         <div class="with-suffix">
           <input type="number" id="ffBid" min="0.5" max="20" step="0.01" placeholder="e.g. 4.00">
           <span class="suffix">&euro;/kg</span>
@@ -916,7 +916,7 @@ document.getElementById('generateBtn').addEventListener('click', () => {
   if (!breed) return alert('Pick a breed.');
   if (!weight || weight < 50 || weight > 1200) return alert('Enter a valid pre-movement weight (50-1200kg).');
   if (!headCount || headCount < 1) return alert('Enter the number of cattle.');
-  if (!ffBid || ffBid < 0.5) return alert('Enter the agreed Farm Fayre price in \u20AC/kg.');
+  if (!ffBid || ffBid < 0.5) return alert('Enter the Farm Fayre Bid Price in \u20AC/kg.');
 
   const breedBands = MARKET.categories[selectedSex].subcategories[cat].breeds[breed];
   const lookup = findBandPrice(breedBands, weight);
