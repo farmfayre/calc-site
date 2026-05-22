@@ -5,6 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Farm Fayre - Seller Comparison</title>
 <meta name="description" content="No more gambling. Know before the cattle leave your farm.">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6TV5G0J88P"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-6TV5G0J88P');
+  function ffTrack(name, params) {
+    try { if (typeof gtag === 'function') gtag('event', name, params || {}); } catch(e) {}
+  }
+</script>
+
 <link rel="stylesheet" href="/shared.css">
 <script src="/html2canvas.min.js" defer></script>
 <style>
@@ -490,7 +503,7 @@
   </main>
 
   <footer class="footer-line">
-    <a href="/buyer/" class="other-side">See the buyer's side</a>
+    <a href="/buyer/" class="other-side" data-ff-other-side="buyer">See the buyer's side</a>
     <span class="footer-attr">Farm Fayre Weekly Aggregate Pricing. Updated Sundays.</span>
   </footer>
 
@@ -504,6 +517,13 @@
 let MARKET = null;
 let lastResult = null;
 let selectedSex = 'male';
+let formStartedFired = false;
+
+function trackFormStarted() {
+  if (formStartedFired) return;
+  formStartedFired = true;
+  ffTrack('form_started', { side: 'seller' });
+}
 
 const TOP_BREEDS_ALL = ['AA','AAX','BB','BBX','CH','CHX','FR','FRX','HE','HEX','LM','LMX','SI','SIX'];
 const TOP_BREEDS_COWS = TOP_BREEDS_ALL.filter(b => b !== 'BB' && b !== 'CH');
@@ -547,7 +567,9 @@ document.querySelectorAll('.info-tip').forEach(t => {
   t.addEventListener('click', e => {
     e.stopPropagation();
     document.querySelectorAll('.info-tip.open').forEach(other => { if (other !== t) other.classList.remove('open'); });
+    const wasOpen = t.classList.contains('open');
     t.classList.toggle('open');
+    if (!wasOpen) ffTrack('info_tip_opened', { side: 'seller', tip: 'ff_bid' });
   });
 });
 document.addEventListener('click', () => {
@@ -556,6 +578,7 @@ document.addEventListener('click', () => {
 
 document.getElementById('sexToggle').addEventListener('click', e => {
   if (e.target.tagName !== 'BUTTON') return;
+  trackFormStarted();
   document.querySelectorAll('#sexToggle button').forEach(b => b.classList.remove('active'));
   e.target.classList.add('active');
   selectedSex = e.target.dataset.sex;
@@ -578,6 +601,7 @@ function populateCategories() {
 }
 
 document.getElementById('category').addEventListener('change', e => {
+  trackFormStarted();
   const cat = e.target.value;
   const breedSel = document.getElementById('breed');
   breedSel.innerHTML = '<option value="">Select breed</option>';
@@ -593,7 +617,10 @@ document.getElementById('category').addEventListener('change', e => {
   updateHint();
 });
 document.getElementById('breed').addEventListener('change', updateHint);
-document.getElementById('weight').addEventListener('input', updateHint);
+document.getElementById('weight').addEventListener('input', () => { trackFormStarted(); updateHint(); });
+document.getElementById('headCount').addEventListener('input', trackFormStarted);
+document.getElementById('ffBid').addEventListener('input', trackFormStarted);
+document.getElementById('sellerName').addEventListener('input', trackFormStarted);
 
 function findBandPrice(breedBands, weight) {
   const bands = Object.keys(breedBands);
@@ -769,8 +796,14 @@ window.addEventListener('popstate', () => {
     document.body.classList.remove('view-result');
   }
 });
-document.getElementById('backBtn').addEventListener('click', showFormView);
-document.getElementById('backBtnBottom').addEventListener('click', showFormView);
+document.getElementById('backBtn').addEventListener('click', () => {
+  ffTrack('new_comparison_clicked', { side: 'seller', location: 'top' });
+  showFormView();
+});
+document.getElementById('backBtnBottom').addEventListener('click', () => {
+  ffTrack('new_comparison_clicked', { side: 'seller', location: 'bottom' });
+  showFormView();
+});
 
 document.getElementById('generateBtn').addEventListener('click', () => {
   const cat = document.getElementById('category').value;
@@ -862,6 +895,35 @@ document.getElementById('generateBtn').addEventListener('click', () => {
   document.getElementById('igNewspaperPerHead').textContent = formatMoney(a.newspaperPerHead);
 
   renderTally(a);
+
+  // Determine scenario fired (mirrors pickTallyScenarios logic)
+  let scenarioUsed = 'default_avg_avg';
+  if (a.sellerAvgLoss <= 0) scenarioUsed = 'edge1_redmond_bottom_good';
+  else if (((a.sellerAvgLoss + a.buyerAvgCost) / a.N) > 200) scenarioUsed = 'edge2_extreme_avg_good';
+
+  const scenarios = pickTallyScenarios(a);
+  const tallyTotal = scenarios.seller.value + Math.max(0, scenarios.buyer.value);
+  const tallyPerHead = tallyTotal / a.N;
+
+  let ffVsMarket = 'at';
+  if (ffBid > mean * 1.005) ffVsMarket = 'above';
+  else if (ffBid < mean * 0.995) ffVsMarket = 'below';
+
+  ffTrack('comparison_generated', {
+    side: 'seller',
+    sex: selectedSex,
+    category: cat,
+    breed: breed,
+    weight_kg: weight,
+    head_count: headCount,
+    ff_bid_eur_per_kg: ffBid,
+    market_avg_eur_per_kg: Math.round(mean * 100) / 100,
+    ff_vs_market: ffVsMarket,
+    scenario_used: scenarioUsed,
+    mart_tax_total_eur: Math.round(tallyTotal),
+    mart_tax_per_head_eur: Math.round(tallyPerHead),
+    has_name: !!sellerName
+  });
 
   showResultView();
   scaleInfographic();
@@ -971,6 +1033,13 @@ async function renderToPNG() {
   }
 }
 
+// Cross-side link
+document.querySelectorAll('[data-ff-other-side]').forEach(link => {
+  link.addEventListener('click', () => {
+    ffTrack('other_side_clicked', { from: 'seller', to: link.dataset.ffOtherSide });
+  });
+});
+
 document.getElementById('downloadBtn').addEventListener('click', async (e) => {
   const btn = e.target;
   const originalText = btn.textContent;
@@ -982,6 +1051,14 @@ document.getElementById('downloadBtn').addEventListener('click', async (e) => {
     a.href = url; a.download = buildFilename();
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+    if (lastResult) {
+      ffTrack('image_downloaded', {
+        side: 'seller',
+        breed: lastResult.input.breed,
+        weight_kg: lastResult.input.weight,
+        head_count: lastResult.input.headCount
+      });
+    }
   } catch (err) {
     alert('Could not render. Please try again.');
   } finally {
