@@ -5,6 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Farm Fayre - Cattle Value Tools</title>
 <meta name="description" content="Every trade has two sides. Pick yours and see your trade priced honestly - full daylight.">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6TV5G0J88P"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-6TV5G0J88P');
+  function ffTrack(name, params) {
+    try { if (typeof gtag === 'function') gtag('event', name, params || {}); } catch(e) {}
+  }
+</script>
+
 <link rel="stylesheet" href="/shared.css">
 <style>
   .landing { display: flex; flex-direction: column; justify-content: center; padding: 16px 0 0; }
@@ -149,13 +162,13 @@
     </div>
 
     <div class="tiles">
-      <a class="tile" href="/seller/">
+      <a class="tile" href="/seller/" data-ff-side="seller">
         <div class="tile-eyebrow">For sellers</div>
         <div class="tile-headline">I'm selling cattle</div>
         <p class="tile-body">Compare your Farm Fayre offer with current mart prices.</p>
       </a>
 
-      <a class="tile" href="/buyer/">
+      <a class="tile" href="/buyer/" data-ff-side="buyer">
         <div class="tile-eyebrow">For buyers</div>
         <div class="tile-headline">I'm buying cattle</div>
         <p class="tile-body">Compare what you actually get versus what you paid for.</p>
@@ -168,7 +181,7 @@
 
   <footer class="footer-line">
     <span class="footer-attr">Farm Fayre Weekly Aggregate Pricing. Updated Sundays.</span>
-    <a href="https://farmfayre.com" class="farmfayre-link" target="_blank" rel="noopener">farmfayre.com</a>
+    <a href="https://farmfayre.com" class="farmfayre-link" target="_blank" rel="noopener" data-ff-cta="farmfayre_homepage">farmfayre.com</a>
   </footer>
 
 </div>
@@ -195,6 +208,18 @@
       document.getElementById('dataWeek').textContent = 'Latest market data';
     }
   })();
+
+  // Event instrumentation
+  document.querySelectorAll('[data-ff-side]').forEach(tile => {
+    tile.addEventListener('click', () => {
+      ffTrack('side_selected', { side: tile.dataset.ffSide, source: 'homepage_tile' });
+    });
+  });
+  document.querySelectorAll('[data-ff-cta]').forEach(link => {
+    link.addEventListener('click', () => {
+      ffTrack('cta_clicked', { destination: link.dataset.ffCta });
+    });
+  });
 </script>
 
 </body>
