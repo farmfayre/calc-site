@@ -237,14 +237,51 @@
   .ig-card.mart {
     background: var(--white);
     border: 1px solid var(--rule);
-    height: 300px;
-    padding: 26px 38px;
+    height: 240px;
+    padding: 22px 38px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
   }
   .ig-card.mart.dear { border-left: 6px solid var(--amber); }
   .ig-card.mart.upside { border-left: 6px solid var(--brand-green-dark); }
+
+  /* === 4-WEEK TREND CHART === */
+  .ig-trend {
+    margin-top: 12px;
+    background: var(--white);
+    border: 1px solid var(--rule);
+    border-left: 6px solid var(--amber);
+    border-radius: 6px;
+    padding: 18px 32px 18px;
+    display: grid;
+    grid-template-columns: 2fr 3fr;
+    gap: 28px;
+    align-items: center;
+  }
+  .ig-trend.is-hidden { display: none; }
+  .ig-trend-left { display: flex; flex-direction: column; gap: 6px; }
+  .ig-trend-eyebrow {
+    font-size: 13px; font-weight: 700; letter-spacing: 0.3em;
+    text-transform: uppercase; color: var(--amber);
+  }
+  .ig-trend-summary {
+    font-family: 'Poppins', sans-serif;
+    font-size: 38px; font-weight: 500; font-style: italic;
+    letter-spacing: -0.01em; line-height: 1.05;
+  }
+  .ig-trend-summary.up      { color: #4D8E2D; }
+  .ig-trend-summary.down    { color: #C44545; }
+  .ig-trend-summary.choppy  { color: var(--amber); }
+  .ig-trend-summary.steady  { color: var(--brand-blue); }
+  .ig-trend-context {
+    font-size: 13px; color: var(--brand-grey);
+    line-height: 1.5; margin-top: 4px;
+  }
+  .ig-trend-chart { width: 100%; max-width: 540px; height: 118px; }
+  .ig-trend-x { font-size: 11px; fill: var(--brand-grey-light); font-family: 'Carlito', sans-serif; letter-spacing: 0.04em; }
+  .ig-trend-v { font-size: 12px; fill: var(--brand-blue); font-family: 'Carlito', sans-serif; font-weight: 700; }
+  .ig-trend-y { font-size: 11px; fill: var(--brand-grey-light); font-family: 'Carlito', sans-serif; }
 
   .ig-card-top { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 24px; }
   .ig-label-top { font-size: 14px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: var(--brand-grey-light); }
@@ -580,6 +617,16 @@
 
             </div>
 
+            <!-- 4-WEEK TREND -->
+            <div class="ig-trend is-hidden" id="igTrend">
+              <div class="ig-trend-left">
+                <div class="ig-trend-eyebrow">4-week price trend</div>
+                <div class="ig-trend-summary" id="igTrendSummary"></div>
+                <div class="ig-trend-context" id="igTrendContext"></div>
+              </div>
+              <div id="igTrendChart"></div>
+            </div>
+
             <div class="ig-footer">
               <div class="ig-disclaimer">
                 * <strong>"Buying cost"</strong> is the value cost of going to the mart and/or paying an agent to purchase for you (without the transparency).
@@ -639,10 +686,18 @@ function trackFormStarted() {
 // Breed and category allowlists
 const TOP_BREEDS_ALL = ['AA','AAX','BB','BBX','CH','CHX','FR','FRX','HE','HEX','LM','LMX','SI','SIX'];
 const TOP_BREEDS_COWS = TOP_BREEDS_ALL.filter(b => b !== 'BB' && b !== 'CH');
-const ALLOWED_CATEGORIES = {
-  male:   ['bullocks', 'bulls'],
-  female: ['heifers',  'dry_fat_cows']
-};
+
+// Resilient category filter: substring-based so it survives scraper terminology changes.
+// Excludes weanling, suckler, calves universally. Includes the right adult categories per sex.
+function isAllowedCategory(side, key, label) {
+  const text = ((key || '') + ' ' + (label || '')).toLowerCase();
+  if (text.includes('weanling')) return false;
+  if (text.includes('suckler'))  return false;
+  if (text.includes('calf') || text.includes('calves')) return false;
+  if (side === 'male')   return text.includes('bullock') || text.includes('steer') || text.includes('bull');
+  if (side === 'female') return text.includes('heifer')  || text.includes('cow');
+  return false;
+}
 
 function isCowCategory(catKey) { return catKey && catKey.toLowerCase().includes('cow'); }
 function allowedBreedsForCategory(catKey) { return isCowCategory(catKey) ? TOP_BREEDS_COWS : TOP_BREEDS_ALL; }
@@ -705,9 +760,8 @@ function populateCategories() {
   const catSel = document.getElementById('category');
   catSel.innerHTML = '<option value="">Select category</option>';
   const subs = MARKET.categories[selectedSex]?.subcategories || {};
-  const allowed = ALLOWED_CATEGORIES[selectedSex] || [];
   Object.entries(subs).forEach(([key, sub]) => {
-    if (!allowed.includes(key)) return;
+    if (!isAllowedCategory(selectedSex, key, sub.label)) return;
     const o = document.createElement('option');
     o.value = key;
     o.textContent = sub.label;
@@ -787,6 +841,157 @@ function updateHint() {
   }
   hint.classList.remove('empty');
   hint.textContent = 'National Breed Average: \u20AC' + fmtPriceKg(result.mean) + '/kg.';
+}
+
+// ---- 4-WEEK TREND CHART ----
+function fillTrend(raw) {
+  const p = raw.slice();
+  const knownCount = p.filter(x => x != null && !isNaN(x)).length;
+  if (knownCount < 2) return null;
+  if (p[3] == null || isNaN(p[3])) return null;
+  for (let pass = 0; pass < 5; pass++) {
+    if (p[2] == null && p[1] != null && p[3] != null) p[2] = (p[1] + p[3]) / 2;
+    if (p[1] == null && p[0] != null && p[2] != null) p[1] = (p[0] + p[2]) / 2;
+    if (p[0] == null && p[1] != null) p[0] = p[1];
+    if (p[1] == null && p[2] != null && p[3] != null) p[1] = p[2] - (p[3] - p[2]);
+    if (p[2] == null && p[0] != null && p[3] != null) {
+      p[2] = p[0] + (p[3] - p[0]) * 2/3;
+      if (p[1] == null) p[1] = p[0] + (p[3] - p[0]) * 1/3;
+    }
+    if (p.every(x => x != null)) break;
+  }
+  if (!p.every(x => x != null)) return null;
+  let firstKnownIdx = 3;
+  for (let i = 0; i < 4; i++) if (raw[i] != null && !isNaN(raw[i])) { firstKnownIdx = i; break; }
+  return { filled: p, firstKnownIdx };
+}
+
+function trendLabel(filled) {
+  const range = Math.max.apply(null, filled) - Math.min.apply(null, filled);
+  if (range < 0.05) return { label: 'Steady', cls: 'steady' };
+  const segs = [filled[1]-filled[0], filled[2]-filled[1], filled[3]-filled[2]];
+  const realSegs = segs.filter(s => Math.abs(s) > 0.005);
+  if (realSegs.length === 0) return { label: 'Steady', cls: 'steady' };
+  if (realSegs.every(s => s > 0)) return { label: 'Trending up', cls: 'up' };
+  if (realSegs.every(s => s < 0)) return { label: 'Trending down', cls: 'down' };
+  return { label: 'Volatile', cls: 'choppy' };
+}
+
+function getBandTrendPrices(breedBands, weight) {
+  const bands = Object.keys(breedBands || {});
+  if (!bands.length) return null;
+  const parsed = bands.map(b => {
+    const [lo, hi] = b.split('-').map(Number);
+    return { band: b, lo, hi };
+  }).sort((a, b) => a.lo - b.lo);
+  let inside = parsed.find(p => weight >= p.lo && weight < p.hi);
+  if (!inside) inside = weight < parsed[0].lo ? parsed[0] : parsed[parsed.length - 1];
+  const prices = breedBands[inside.band];
+  if (!Array.isArray(prices) || prices.length < 4) return null;
+  return { bandName: inside.band, prices: prices.slice(-4) };
+}
+
+function shiftToSaturday(dateStr) {
+  const d = new Date(dateStr);
+  const daysBack = (d.getDay() + 1) % 7;
+  d.setDate(d.getDate() - daysBack);
+  return d;
+}
+function getTrendDates(market) {
+  let raw;
+  if (Array.isArray(market.weeks) && market.weeks.length >= 4) {
+    raw = market.weeks.slice(-4);
+  } else {
+    const end = new Date(market.week_ending);
+    raw = [];
+    for (let i = 3; i >= 0; i--) {
+      const d = new Date(end); d.setDate(end.getDate() - i * 7);
+      raw.push(d.toISOString().slice(0,10));
+    }
+  }
+  return raw.map(shiftToSaturday);
+}
+
+function fmtShortDate(d) {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return d.getDate() + ' ' + months[d.getMonth()];
+}
+
+function buildTrendChartSVG(filled, dates) {
+  const W = 540, H = 118;
+  const X_LEFT = 60, X_RIGHT = 520;
+  const Y_TOP = 22, Y_BOTTOM = 88;
+  const EPS = 0.005;
+  const COL_UP = '#4D8E2D', COL_DOWN = '#C44545', COL_FLAT = '#8C92A3', COL_NEUTRAL = '#21285D';
+
+  const dMin = Math.min.apply(null, filled), dMax = Math.max.apply(null, filled);
+  let step = 0.25;
+  const range = dMax - dMin;
+  if (range > 1.0) step = 0.50;
+  if (range > 2.5) step = 1.00;
+  let yMin = Math.floor((dMin - 0.05) / step) * step;
+  let yMax = Math.ceil((dMax + 0.05) / step) * step;
+  if (yMax - yMin < step * 2) { yMin -= step; yMax += step; }
+  const yMid = (yMin + yMax) / 2;
+
+  const priceToY = price => Y_TOP + (yMax - price) / (yMax - yMin) * (Y_BOTTOM - Y_TOP);
+  const xs = [0,1,2,3].map(i => X_LEFT + (X_RIGHT - X_LEFT) * i / 3);
+  const fmtP = v => '\u20AC' + v.toFixed(2);
+
+  let svg = `<svg class="ig-trend-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">`;
+  svg += `<line x1="${X_LEFT-12}" y1="${Y_TOP}" x2="${X_RIGHT+10}" y2="${Y_TOP}" stroke="#EAE3D2" stroke-width="1"/>`;
+  svg += `<line x1="${X_LEFT-12}" y1="${(Y_TOP+Y_BOTTOM)/2}" x2="${X_RIGHT+10}" y2="${(Y_TOP+Y_BOTTOM)/2}" stroke="#EAE3D2" stroke-width="1"/>`;
+  svg += `<line x1="${X_LEFT-12}" y1="${Y_BOTTOM}" x2="${X_RIGHT+10}" y2="${Y_BOTTOM}" stroke="#EAE3D2" stroke-width="1"/>`;
+  svg += `<text class="ig-trend-y" x="${X_LEFT-17}" y="${Y_TOP+4}" text-anchor="end">${fmtP(yMax)}</text>`;
+  svg += `<text class="ig-trend-y" x="${X_LEFT-17}" y="${(Y_TOP+Y_BOTTOM)/2+4}" text-anchor="end">${fmtP(yMid)}</text>`;
+  svg += `<text class="ig-trend-y" x="${X_LEFT-17}" y="${Y_BOTTOM+4}" text-anchor="end">${fmtP(yMin)}</text>`;
+
+  for (let i = 0; i < 3; i++) {
+    const x1 = xs[i], y1 = priceToY(filled[i]);
+    const x2 = xs[i+1], y2 = priceToY(filled[i+1]);
+    const diff = filled[i+1] - filled[i];
+    let color = COL_FLAT;
+    if (diff > EPS) color = COL_UP;
+    else if (diff < -EPS) color = COL_DOWN;
+    svg += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${color}" stroke-width="3" stroke-linecap="round"/>`;
+  }
+  for (let i = 0; i < 4; i++) {
+    const cx = xs[i], cy = priceToY(filled[i]);
+    let stroke = COL_NEUTRAL;
+    if (i > 0) {
+      const diff = filled[i] - filled[i-1];
+      if (diff > EPS) stroke = COL_UP;
+      else if (diff < -EPS) stroke = COL_DOWN;
+      else stroke = COL_FLAT;
+    }
+    svg += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="5" fill="#FFFFFF" stroke="${stroke}" stroke-width="2.5"/>`;
+    const valueY = cy < Y_TOP + 14 ? cy + 17 : cy - 9;
+    svg += `<text class="ig-trend-v" x="${cx.toFixed(1)}" y="${valueY.toFixed(1)}" text-anchor="middle">${fmtP(filled[i])}</text>`;
+    svg += `<text class="ig-trend-x" x="${cx.toFixed(1)}" y="${H - 6}" text-anchor="middle">${fmtShortDate(dates[i])}</text>`;
+  }
+  svg += '</svg>';
+  return svg;
+}
+
+function renderTrendSection(breedBands, weight, breedLabel, catLabel) {
+  const trendEl = document.getElementById('igTrend');
+  trendEl.classList.add('is-hidden');
+  if (!MARKET || !breedBands) return;
+  const bandData = getBandTrendPrices(breedBands, weight);
+  if (!bandData) return;
+  const fill = fillTrend(bandData.prices);
+  if (!fill) return;
+  const dates = getTrendDates(MARKET);
+  if (!dates || dates.length < 4) return;
+  const lbl = trendLabel(fill.filled);
+
+  const summaryEl = document.getElementById('igTrendSummary');
+  summaryEl.textContent = lbl.label;
+  summaryEl.className = 'ig-trend-summary ' + lbl.cls;
+  document.getElementById('igTrendContext').textContent =
+    breedLabel + ' ' + catLabel + ' ' + bandData.bandName + 'kg \u00B7 National mart pricing \u00B7 \u20AC/kg';
+  document.getElementById('igTrendChart').innerHTML = buildTrendChartSVG(fill.filled, dates);
+  trendEl.classList.remove('is-hidden');
 }
 
 // ---- TRADE MATH ----
@@ -1022,6 +1227,9 @@ document.getElementById('generateBtn').addEventListener('click', () => {
     landedKg: a.landedGoodKg, phantom: a.phantomGood,
     agent: a.agent, foregone: a.foregone
   });
+
+  // 4-week trend chart
+  renderTrendSection(breedBands, weight, breed, subDisplay);
 
   // Trade Tally - adaptive scenarios
   renderTally(a);
