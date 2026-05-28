@@ -1,0 +1,36 @@
+# ============================================================
+# STAGE 4: BACKUP TO ONEDRIVE (best-effort - never gates success)
+# ============================================================
+# Publish already succeeded and the success state is recorded above.
+# OneDrive is an offsite backup of the PDF + JSON archives. A backup
+# outage (expired OAuth, Microsoft throttling) must NOT fail the run or
+# stall the guard's anchor chain - so every failure here alerts or warns
+# but lets the run finish clean.
+log "INFO" "Stage 4/4: Backing up PDF + JSONs to OneDrive (best-effort)"
+
+if ! command -v rclone >/dev/null 2>&1; then
+    alert_failure "rclone not installed (backup skipped)" "rclone command not found. Publish succeeded; offsite backup did not run."
+elif ! rclone lsd "${ONEDRIVE_REMOTE%:*}:" --max-depth 0 >> "$LOG_FILE" 2>&1; then
+    alert_failure "OneDrive unreachable (backup skipped)" "rclone cannot reach ${ONEDRIVE_REMOTE}. OAuth may have expired or Microsoft is throttling - run 'rclone config reconnect onedrive:' on the VM. Publish succeeded; only the offsite backup is affected."
+else
+    # Connectivity OK - upload PDF + both JSON archives. Individual
+    # failures warn but never abort.
+    rclone copy "$PDF_FILE" "$ONEDRIVE_REMOTE/" --log-file="$LOG_FILE" --log-level=INFO || \\
+        log "WARN" "PDF upload failed (non-fatal)"
+
+    JSON_ARCHIVE="${CALC_SITE_DIR}/market_data_${scraped_week_ending}.json"
+    if [[ -s "$JSON_ARCHIVE" ]]; then
+        rclone copy "$JSON_ARCHIVE" "$ONEDRIVE_REMOTE/" --log-file="$LOG_FILE" --log-level=INFO || \\
+            log "WARN" "JSON archive upload failed (non-fatal)"
+    fi
+
+    # Audit-trail: the INTERNAL (unrounded, full taxonomy) JSON.
+    INTERNAL_JSON="${CALC_SITE_DIR}/market_data_internal.json"
+    if [[ -s "$INTERNAL_JSON" ]]; then
+        INTERNAL_DATED="market_data_internal_${scraped_week_ending}.json"
+        rclone copyto "$INTERNAL_JSON" "$ONEDRIVE_REMOTE/${INTERNAL_DATED}" --log-file="$LOG_FILE" --log-level=INFO || \\
+            log "WARN" "Internal JSON upload failed (non-fatal)"
+    fi
+
+    log "INFO" "Stage 4/4 done - PDF + JSONs in OneDrive"
+fi
