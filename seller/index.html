@@ -884,6 +884,8 @@ document.getElementById('generateBtn').addEventListener('click', () => {
   if (result.error) return alert(result.error);
   const mean = result.mean;
   const a = result.analysis;
+  window._ff_flag = result.flag || "";
+  window._ff_flag = result.flag || '';
   const subLabel = result.subLabel;
   const singularSub = subLabel.replace(/s$/, '');
   const subDisplay = headCount === 1 ? singularSub : subLabel;
@@ -992,7 +994,7 @@ function renderMartScenario(o) {
 
   document.getElementById(o.figureId).textContent = formatMoney(o.perHead);
   document.getElementById(o.mathId).innerHTML =
-    o.ringKg.toFixed(0) + 'kg ring x \u20AC' + fmtPriceKg(o.priceKg) + '/kg = <strong>\u20AC' + formatMoney(o.perHead) + '</strong>';
+    o.ringKg.toFixed(0) + 'kg ring x \u20AC' + fmtPriceKg(o.priceKg) + '/kg' + (window._ff_flag || '') + ' = <strong>\u20AC' + formatMoney(o.perHead) + '</strong>';
 
   const card = document.getElementById(o.cardId);
   card.classList.remove('dear', 'upside');
