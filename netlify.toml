@@ -1,31 +1,42 @@
 # Farm Fayre calc-site Netlify configuration
-# Added in the privacy/proxy build (v2.1).
+# Server-side calc v3 — raw price data never leaves the function.
 
 [build]
   publish = "."
   functions = "netlify/functions"
 
-# Bundle the (non-served) data file into the function so it can read it at runtime.
 [functions]
   included_files = ["_data/**"]
 
-# --- Routing & access control -----------------------------------------------
-# These [[redirects]] are evaluated BEFORE the _redirects file.
-
-# Serve the dataset only through the function.
+# API routes — all go to the same function, routed by path
 [[redirects]]
-  from = "/api/prices"
+  from = "/api/breeds"
   to = "/.netlify/functions/prices"
   status = 200
 
-# Block direct access to the old public data file (now retired).
+[[redirects]]
+  from = "/api/price"
+  to = "/.netlify/functions/prices"
+  status = 200
+
+[[redirects]]
+  from = "/api/compare"
+  to = "/.netlify/functions/prices"
+  status = 200
+
+# Block retired endpoints
+[[redirects]]
+  from = "/api/prices"
+  to = "/404.html"
+  status = 404
+  force = true
+
 [[redirects]]
   from = "/market_data.json"
   to = "/404.html"
   status = 404
   force = true
 
-# Block direct access to the bundled data directory.
 [[redirects]]
   from = "/_data/*"
   to = "/404.html"

@@ -561,7 +561,7 @@
 // Farm Fayre Seller Calculator - v4
 // =============================================================================
 
-let MARKET = null;
+let BREEDS = null;
 let lastResult = null;
 let selectedSex = 'male';
 let formStartedFired = false;
@@ -594,17 +594,6 @@ function allowedBreedsForCategory(catKey) { return isCowCategory(catKey) ? TOP_B
 
 function formatMoney(n) { if (n === null || n === undefined || isNaN(n)) return '0'; return Math.round(n).toLocaleString('en-IE'); }
 function fmtPriceKg(n) { return n.toFixed(2); }
-function getFlagHint(cat, breed, bandName) {
-  if (!MARKET || !MARKET.flags) return '';
-  var bands = bandName.indexOf('&') >= 0 ? bandName.split(' & ') : [bandName];
-  for (var i = 0; i < bands.length; i++) {
-    var key = selectedSex + '/' + cat + '/' + breed + '/' + bands[i].trim();
-    var f = MARKET.flags[key];
-    if (f === 'DERIVED') return ' (est.)';
-    if (f === 'FLAGGED') return ' \u26A0';
-  }
-  return '';
-}
 
 function fmtSaturdayWeekEnd(dateStr) {
   // Find the most recent Saturday on or before the JSON date, regardless of
@@ -620,10 +609,10 @@ function fmtSaturdayWeekEnd(dateStr) {
 
 (async function init() {
   try {
-    const r = await (async () => { for (let i=0;i<2;i++){ try { const x = await fetch('/api/prices'); if (x.ok) return x; } catch(e){} await new Promise(s=>setTimeout(s,400)); } throw new Error('fetch failed'); })();
+    const r = await fetch('/api/breeds');
     if (!r.ok) throw new Error('fetch failed');
-    MARKET = await r.json();
-    document.getElementById('dataWeek').textContent = 'Week ending ' + fmtSaturdayWeekEnd(MARKET.week_ending);
+    BREEDS = await r.json();
+    document.getElementById('dataWeek').textContent = 'Week ending ' + fmtSaturdayWeekEnd(BREEDS.week_ending);
     populateCategories();
   } catch (e) {
     document.getElementById('dataWeek').textContent = 'Data unavailable';
@@ -654,10 +643,10 @@ document.getElementById('sexToggle').addEventListener('click', e => {
 });
 
 function populateCategories() {
-  if (!MARKET) return;
+  if (!BREEDS) return;
   const catSel = document.getElementById('category');
   catSel.innerHTML = '<option value="">Select category</option>';
-  const subs = MARKET.categories[selectedSex]?.subcategories || {};
+  const subs = BREEDS.categories[selectedSex]?.subcategories || {};
   Object.entries(subs).forEach(([key, sub]) => {
     if (!isAllowedCategory(selectedSex, key, sub.label)) return;
     const o = document.createElement('option');
@@ -673,12 +662,12 @@ document.getElementById('category').addEventListener('change', e => {
   const breedSel = document.getElementById('breed');
   breedSel.innerHTML = '<option value="">Select breed</option>';
   if (!cat) return;
-  const breeds = MARKET.categories[selectedSex].subcategories[cat]?.breeds || {};
+  const breeds = BREEDS.categories[selectedSex].subcategories[cat]?.breeds || [];
   const allowed = allowedBreedsForCategory(cat);
-  Object.keys(breeds).filter(b => allowed.includes(b)).sort().forEach(b => {
+  breeds.filter(b => allowed.includes(b)).sort().forEach(b => {
     const o = document.createElement('option');
     o.value = b;
-    o.textContent = b + (MARKET.breed_names && MARKET.breed_names[b] ? ' - ' + MARKET.breed_names[b] : '');
+    o.textContent = b + (BREEDS.breed_names && BREEDS.breed_names[b] ? ' - ' + BREEDS.breed_names[b] : '');
     breedSel.appendChild(o);
   });
   updateHint();
@@ -689,117 +678,28 @@ document.getElementById('headCount').addEventListener('input', trackFormStarted)
 document.getElementById('ffBid').addEventListener('input', trackFormStarted);
 document.getElementById('sellerName').addEventListener('input', trackFormStarted);
 
-function findBandPrice(breedBands, weight) {
-  const bands = Object.keys(breedBands);
-  if (!bands.length) return null;
-  let parsed = bands.map(b => { const [lo, hi] = b.split('-').map(Number); return { band: b, lo, hi, mid: (lo + hi) / 2 }; }).sort((a, b) => a.lo - b.lo);
-  const inside = parsed.find(p => weight >= p.lo && weight < p.hi);
-  if (!inside) {
-    const nearest = weight < parsed[0].lo ? parsed[0] : parsed[parsed.length - 1];
-    const prices = breedBands[nearest.band];
-    return { mean: prices && prices[prices.length - 1], bandName: nearest.band, blended: false };
-  }
-  const lowDist = weight - inside.lo, highDist = inside.hi - weight;
-  const minDist = Math.min(lowDist, highDist);
-  const closeToBoundary = (minDist / (inside.hi - inside.lo)) < 0.05;
-  const insideCurrent = (breedBands[inside.band] || [])[breedBands[inside.band].length - 1];
-  if (!closeToBoundary) return { mean: insideCurrent, bandName: inside.band, blended: false };
-  let adjacent = lowDist < highDist ? parsed.find(p => p.hi === inside.lo) : parsed.find(p => p.lo === inside.hi);
-  if (!adjacent) return { mean: insideCurrent, bandName: inside.band, blended: false };
-  const adjPrices = breedBands[adjacent.band];
-  const adjCurrent = adjPrices && adjPrices[adjPrices.length - 1];
-  if (adjCurrent == null) return { mean: insideCurrent, bandName: inside.band, blended: false };
-  if (insideCurrent == null) return { mean: adjCurrent, bandName: adjacent.band, blended: false };
-  return { mean: (insideCurrent + adjCurrent) / 2, bandName: inside.band + ' & ' + adjacent.band, blended: true };
-}
-
 function updateHint() {
   const cat = document.getElementById('category').value;
   const breed = document.getElementById('breed').value;
   const weight = parseFloat(document.getElementById('weight').value);
   const hint = document.getElementById('weightHint');
-  if (!cat || !breed || !weight || weight < 50 || !MARKET) { hint.classList.add('empty'); return; }
-  const breedBands = MARKET.categories[selectedSex].subcategories[cat].breeds[breed];
-  if (!breedBands) { hint.classList.add('empty'); return; }
-  const result = findBandPrice(breedBands, weight);
-  if (!result || result.mean == null) {
-    hint.classList.remove('empty');
-    hint.textContent = 'No mart data available for this breed x weight';
-    return;
-  }
+  if (!cat || !breed || !weight || weight < 50 || !BREEDS) { hint.classList.add('empty'); return; }
   hint.classList.remove('empty');
-  hint.textContent = 'National Breed Average: \u20AC' + fmtPriceKg(result.mean) + '/kg.' + getFlagHint(cat, breed, result.bandName);
+  hint.textContent = 'Loading...';
+  clearTimeout(window._hintTimer);
+  window._hintTimer = setTimeout(async () => {
+    try {
+      const resp = await fetch('/api/price', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({sex:selectedSex, category:cat, breed, weight}) });
+      const pd = await resp.json();
+      if (pd.error) { hint.textContent = pd.error === 'no data for this weight' ? 'No mart data available for this breed x weight' : pd.error; return; }
+      hint.textContent = 'National Breed Average: \u20AC' + fmtPriceKg(pd.mean) + '/kg.' + (pd.flag || '');
+      window._lastTrend = pd.trend;
+      window._lastWeeks = pd.weekEnding;
+    } catch(e) { hint.textContent = 'Connection error'; }
+  }, 300);
 }
 
 // ---- 4-WEEK TREND CHART ----
-function fillTrend(raw) {
-  const p = raw.slice();
-  const knownCount = p.filter(x => x != null && !isNaN(x)).length;
-  if (knownCount < 2) return null;
-  if (p[3] == null || isNaN(p[3])) return null;
-  for (let pass = 0; pass < 5; pass++) {
-    if (p[2] == null && p[1] != null && p[3] != null) p[2] = (p[1] + p[3]) / 2;
-    if (p[1] == null && p[0] != null && p[2] != null) p[1] = (p[0] + p[2]) / 2;
-    if (p[0] == null && p[1] != null) p[0] = p[1];
-    if (p[1] == null && p[2] != null && p[3] != null) p[1] = p[2] - (p[3] - p[2]);
-    if (p[2] == null && p[0] != null && p[3] != null) {
-      p[2] = p[0] + (p[3] - p[0]) * 2/3;
-      if (p[1] == null) p[1] = p[0] + (p[3] - p[0]) * 1/3;
-    }
-    if (p.every(x => x != null)) break;
-  }
-  if (!p.every(x => x != null)) return null;
-  let firstKnownIdx = 3;
-  for (let i = 0; i < 4; i++) if (raw[i] != null && !isNaN(raw[i])) { firstKnownIdx = i; break; }
-  return { filled: p, firstKnownIdx };
-}
-
-function trendLabel(filled) {
-  const range = Math.max.apply(null, filled) - Math.min.apply(null, filled);
-  if (range < 0.05) return { label: 'Steady', cls: 'steady' };
-  const segs = [filled[1]-filled[0], filled[2]-filled[1], filled[3]-filled[2]];
-  const realSegs = segs.filter(s => Math.abs(s) > 0.005);
-  if (realSegs.length === 0) return { label: 'Steady', cls: 'steady' };
-  if (realSegs.every(s => s > 0)) return { label: 'Trending up', cls: 'up' };
-  if (realSegs.every(s => s < 0)) return { label: 'Trending down', cls: 'down' };
-  return { label: 'Volatile', cls: 'choppy' };
-}
-
-function getBandTrendPrices(breedBands, weight) {
-  const bands = Object.keys(breedBands || {});
-  if (!bands.length) return null;
-  const parsed = bands.map(b => {
-    const [lo, hi] = b.split('-').map(Number);
-    return { band: b, lo, hi };
-  }).sort((a, b) => a.lo - b.lo);
-  let inside = parsed.find(p => weight >= p.lo && weight < p.hi);
-  if (!inside) inside = weight < parsed[0].lo ? parsed[0] : parsed[parsed.length - 1];
-  const prices = breedBands[inside.band];
-  if (!Array.isArray(prices) || prices.length < 4) return null;
-  return { bandName: inside.band, prices: prices.slice(-4) };
-}
-
-function shiftToSaturday(dateStr) {
-  const d = new Date(dateStr);
-  const daysBack = (d.getDay() + 1) % 7;
-  d.setDate(d.getDate() - daysBack);
-  return d;
-}
-function getTrendDates(market) {
-  let raw;
-  if (Array.isArray(market.weeks) && market.weeks.length >= 4) {
-    raw = market.weeks.slice(-4);
-  } else {
-    const end = new Date(market.week_ending);
-    raw = [];
-    for (let i = 3; i >= 0; i--) {
-      const d = new Date(end); d.setDate(end.getDate() - i * 7);
-      raw.push(d.toISOString().slice(0,10));
-    }
-  }
-  return raw.map(shiftToSaturday);
-}
-
 function fmtShortDate(d) {
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   return d.getDate() + ' ' + months[d.getMonth()];
@@ -868,91 +768,21 @@ function buildTrendChartSVG(filled, dates) {
   return svg;
 }
 
-function renderTrendSection(breedBands, weight, breedLabel, catLabel) {
+function renderTrendSection(trend, breedLabel, catLabel) {
   const trendEl = document.getElementById('igTrend');
   trendEl.classList.add('is-hidden');
-  if (!MARKET || !breedBands) return;
-  const bandData = getBandTrendPrices(breedBands, weight);
-  if (!bandData) return;
-  const fill = fillTrend(bandData.prices);
-  if (!fill) return;
-  const dates = getTrendDates(MARKET);
-  if (!dates || dates.length < 4) return;
-  const lbl = trendLabel(fill.filled);
-
+  if (!trend) return;
   const summaryEl = document.getElementById('igTrendSummary');
-  summaryEl.textContent = lbl.label;
-  summaryEl.className = 'ig-trend-summary ' + lbl.cls;
+  summaryEl.textContent = trend.label;
+  summaryEl.className = 'ig-trend-summary ' + trend.cls;
   document.getElementById('igTrendContext').textContent =
-    breedLabel + ' ' + catLabel + ' ' + bandData.bandName + 'kg \u00B7 National mart pricing \u00B7 \u20AC/kg';
-  document.getElementById('igTrendChart').innerHTML = buildTrendChartSVG(fill.filled, dates);
+    breedLabel + ' ' + catLabel + ' ' + trend.bandName + 'kg \u00B7 National mart pricing \u00B7 \u20AC/kg';
+  document.getElementById('igTrendChart').innerHTML = buildTrendChartSVG(trend.filled, trend.dates);
   trendEl.classList.remove('is-hidden');
 }
 
 // ---- TRADE MATH ----
 // ---- SHARED TRADE MATH (mirrors buyer page) ----
-function analyzeTrade(W, mean, ffBid, N) {
-  const closeWeight = W * 0.975;
-  const ringWeight  = W * 0.9375;
-  const ffPerHead   = closeWeight * ffBid;
-
-  const martSellerAvg    = ringWeight * mean;
-  const martSellerTop    = ringWeight * mean * 1.05;
-  const martSellerBottom = ringWeight * mean * 0.95;
-
-  const phantomGood = W * 0.0075 * mean;
-  const phantomAvg  = W * 0.0175 * mean;
-  const agent = 20;
-  const foregone = 0.31 * 70 * mean * Math.min(1, W / 500);
-  const martBuyerGood = ringWeight * mean + phantomGood + agent + foregone;
-  const martBuyerAvg  = ringWeight * mean + phantomAvg  + agent + foregone;
-
-  const newspaperKg = mean * 1.085;
-  const newspaperPerHead = ringWeight * newspaperKg;
-
-  const sellerAvgDelta    = ffPerHead - martSellerAvg;
-  const sellerTopDelta    = ffPerHead - martSellerTop;
-  const sellerBottomDelta = ffPerHead - martSellerBottom;
-  const buyerGoodDelta    = martBuyerGood - ffPerHead;
-  const buyerAvgDelta     = martBuyerAvg  - ffPerHead;
-
-  return {
-    W, mean, ffBid, N,
-    closeWeight, ringWeight,
-    ffPerHead,
-    martSellerAvg, martSellerTop, martSellerBottom,
-    martBuyerGood, martBuyerAvg,
-    newspaperKg, newspaperPerHead,
-    sellerAvgDelta, sellerTopDelta, sellerBottomDelta,
-    buyerGoodDelta, buyerAvgDelta,
-    sellerAvgLoss:    sellerAvgDelta    * N,
-    sellerTopLoss:    sellerTopDelta    * N,
-    sellerBottomLoss: sellerBottomDelta * N,
-    buyerGoodCost:    buyerGoodDelta    * N,
-    buyerAvgCost:     buyerAvgDelta     * N,
-  };
-}
-
-function pickTallyScenarios(a) {
-  if (a.sellerAvgLoss <= 0) {
-    return {
-      seller: { label: "Seller's downside avoided", value: a.sellerBottomLoss, caption: "If the trade tanks at the mart" },
-      buyer:  { label: "Buyer's cost", value: a.buyerGoodCost, caption: "Even on a good day at the mart" }
-    };
-  }
-  const combinedPerHead = (a.sellerAvgLoss + a.buyerAvgCost) / a.N;
-  if (combinedPerHead > 200) {
-    return {
-      seller: { label: "Seller's loss", value: a.sellerAvgLoss, caption: "Assuming average mart price" },
-      buyer:  { label: "Buyer's cost", value: a.buyerGoodCost, caption: "Even on a good day at the mart" }
-    };
-  }
-  return {
-    seller: { label: "Seller's loss", value: a.sellerAvgLoss, caption: "Assuming average mart price" },
-    buyer:  { label: "Buyer's cost", value: a.buyerAvgCost,  caption: "On a bad day at the mart" }
-  };
-}
-
 // Canvas-based text measurement - reliable, no layout timing issues
 function _getCanvasCtx() {
   if (!_getCanvasCtx.ctx) {
@@ -1045,22 +875,23 @@ document.getElementById('generateBtn').addEventListener('click', () => {
   if (!headCount || headCount < 1) return alert('Enter the number of cattle.');
   if (!ffBid || ffBid < 0.5) return alert('Enter the Farm Fayre bid in \u20AC/kg.');
 
-  const breedBands = MARKET.categories[selectedSex].subcategories[cat].breeds[breed];
-  const lookup = findBandPrice(breedBands, weight);
-  window._ff_flag = lookup ? getFlagHint(cat, breed, lookup.bandName) : '';
-  if (!lookup || lookup.mean == null) return alert('No mart data available for this breed x weight.');
-
-  const mean = lookup.mean;
-  const a = analyzeTrade(weight, mean, ffBid, headCount);
-
-  const subLabel = MARKET.categories[selectedSex].subcategories[cat].label;
+  let result;
+  try {
+    const resp = await fetch('/api/compare', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({sex:selectedSex, category:cat, breed, weight, ffBid, headCount, name:sellerName, side:'seller'}) });
+    result = await resp.json();
+  } catch(e) { return alert('Connection error. Please try again.'); }
+  if (result.error) return alert(result.error);
+  const mean = result.mean;
+  const a = result.analysis;
+  const subLabel = result.subLabel;
   const singularSub = subLabel.replace(/s$/, '');
   const subDisplay = headCount === 1 ? singularSub : subLabel;
   const subDisplayUpper = subDisplay.toUpperCase();
 
   lastResult = { input: { selectedSex, cat, breed, weight, headCount, ffBid, sellerName, subLabel }, mean, ...a };
 
-  document.getElementById('igWeek').textContent = 'Week ending ' + fmtSaturdayWeekEnd(MARKET.week_ending);
+  document.getElementById('igWeek').textContent = 'Week ending ' + fmtSaturdayWeekEnd(result.weekEnding);
   document.getElementById('igEyebrow').textContent = headCount + ' HEAD \u00B7 ' + breed + ' ' + subDisplayUpper + ' \u00B7 ' + weight + 'KG ON FARM';
 
   const h1 = document.getElementById('igH1');
@@ -1122,18 +953,13 @@ document.getElementById('generateBtn').addEventListener('click', () => {
   document.getElementById('igNewspaperPerHead').textContent = formatMoney(a.newspaperPerHead);
 
   // 4-week trend chart
-  renderTrendSection(breedBands, weight, breed, subDisplay);
+  renderTrendSection(result.trend, breed, subDisplay);
 
-  renderTally(a);
+  renderTally(result.tally, a.N);
 
   // Determine scenario fired (mirrors pickTallyScenarios logic)
-  let scenarioUsed = 'default_avg_avg';
-  if (a.sellerAvgLoss <= 0) scenarioUsed = 'edge1_redmond_bottom_good';
-  else if (((a.sellerAvgLoss + a.buyerAvgCost) / a.N) > 200) scenarioUsed = 'edge2_extreme_avg_good';
-
-  const scenarios = pickTallyScenarios(a);
-  const tallyTotal = scenarios.seller.value + Math.max(0, scenarios.buyer.value);
-  const tallyPerHead = tallyTotal / a.N;
+  const tallyTotal = result.tallyTotal;
+  const tallyPerHead = result.tallyPerHead;
 
   let ffVsMarket = 'at';
   if (ffBid > mean * 1.005) ffVsMarket = 'above';
@@ -1149,7 +975,7 @@ document.getElementById('generateBtn').addEventListener('click', () => {
     ff_bid_eur_per_kg: ffBid,
     market_avg_eur_per_kg: Math.round(mean * 100) / 100,
     ff_vs_market: ffVsMarket,
-    scenario_used: scenarioUsed,
+    scenario_used: result.scenarioUsed,
     mart_tax_total_eur: Math.round(tallyTotal),
     mart_tax_per_head_eur: Math.round(tallyPerHead),
     has_name: !!sellerName
@@ -1166,7 +992,7 @@ function renderMartScenario(o) {
 
   document.getElementById(o.figureId).textContent = formatMoney(o.perHead);
   document.getElementById(o.mathId).innerHTML =
-    o.ringKg.toFixed(0) + 'kg ring x \u20AC' + fmtPriceKg(o.priceKg) + '/kg' + (window._ff_flag || '') + ' = <strong>\u20AC' + formatMoney(o.perHead) + '</strong>';
+    o.ringKg.toFixed(0) + 'kg ring x \u20AC' + fmtPriceKg(o.priceKg) + '/kg = <strong>\u20AC' + formatMoney(o.perHead) + '</strong>';
 
   const card = document.getElementById(o.cardId);
   card.classList.remove('dear', 'upside');
@@ -1183,8 +1009,7 @@ function renderMartScenario(o) {
   }
 }
 
-function renderTally(a) {
-  const scenarios = pickTallyScenarios(a);
+function renderTally(scenarios, N) {
   const body = document.getElementById('tallyBody');
   let html = '';
   html += rowHTML(scenarios.seller.label, scenarios.seller.value, scenarios.seller.caption);
@@ -1197,7 +1022,7 @@ function renderTally(a) {
     html += rowHTML(scenarios.buyer.label, 0, 'Farm Fayre and mart are comparable for the buyer at this price level');
   }
 
-  const perHead = total / a.N;
+  const perHead = total / N;
   html += '<div class="tally-row total">' +
     '<div class="lbl">' +
       '<div class="lbl-main">Total mart tax</div>' +
