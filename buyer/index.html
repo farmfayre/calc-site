@@ -869,7 +869,7 @@ function buildTrendChartSVG(filled, dates) {
     svg += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="5" fill="#FFFFFF" stroke="${stroke}" stroke-width="2.5"/>`;
     const valueY = cy < Y_TOP + 14 ? cy + 17 : cy - 9;
     svg += `<text class="ig-trend-v" x="${cx.toFixed(1)}" y="${valueY.toFixed(1)}" text-anchor="middle">${fmtP(filled[i])}</text>`;
-    svg += `<text class="ig-trend-x" x="${cx.toFixed(1)}" y="${H - 6}" text-anchor="middle">${fmtShortDate(dates[i])}</text>`;
+    svg += `<text class="ig-trend-x" x="${cx.toFixed(1)}" y="${H - 6}" text-anchor="middle">${dates[i]}</text>`;
   }
   svg += '</svg>';
   return svg;
