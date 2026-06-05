@@ -722,7 +722,7 @@ function fmtSaturdayWeekEnd(dateStr) {
 
 (async function init() {
   try {
-    const r = await fetch('/market_data.json?t=' + Date.now(), { cache: 'no-store' });
+    const r = await (async () => { for (let i=0;i<2;i++){ try { const x = await fetch('/api/prices'); if (x.ok) return x; } catch(e){} await new Promise(s=>setTimeout(s,400)); } throw new Error('fetch failed'); })();
     if (!r.ok) throw new Error('fetch failed');
     MARKET = await r.json();
     document.getElementById('dataWeek').textContent = 'Week ending ' + fmtSaturdayWeekEnd(MARKET.week_ending);
