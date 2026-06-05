@@ -594,6 +594,17 @@ function allowedBreedsForCategory(catKey) { return isCowCategory(catKey) ? TOP_B
 
 function formatMoney(n) { if (n === null || n === undefined || isNaN(n)) return '0'; return Math.round(n).toLocaleString('en-IE'); }
 function fmtPriceKg(n) { return n.toFixed(2); }
+function getFlagHint(cat, breed, bandName) {
+  if (!MARKET || !MARKET.flags) return '';
+  var bands = bandName.indexOf('&') >= 0 ? bandName.split(' & ') : [bandName];
+  for (var i = 0; i < bands.length; i++) {
+    var key = selectedSex + '/' + cat + '/' + breed + '/' + bands[i].trim();
+    var f = MARKET.flags[key];
+    if (f === 'DERIVED') return ' (est.)';
+    if (f === 'FLAGGED') return ' \u26A0';
+  }
+  return '';
+}
 
 function fmtSaturdayWeekEnd(dateStr) {
   // Find the most recent Saturday on or before the JSON date, regardless of
@@ -717,7 +728,7 @@ function updateHint() {
     return;
   }
   hint.classList.remove('empty');
-  hint.textContent = 'National Breed Average: \u20AC' + fmtPriceKg(result.mean) + '/kg.';
+  hint.textContent = 'National Breed Average: \u20AC' + fmtPriceKg(result.mean) + '/kg.' + getFlagHint(cat, breed, result.bandName);
 }
 
 // ---- 4-WEEK TREND CHART ----
@@ -1036,6 +1047,7 @@ document.getElementById('generateBtn').addEventListener('click', () => {
 
   const breedBands = MARKET.categories[selectedSex].subcategories[cat].breeds[breed];
   const lookup = findBandPrice(breedBands, weight);
+  window._ff_flag = lookup ? getFlagHint(cat, breed, lookup.bandName) : '';
   if (!lookup || lookup.mean == null) return alert('No mart data available for this breed x weight.');
 
   const mean = lookup.mean;
@@ -1154,7 +1166,7 @@ function renderMartScenario(o) {
 
   document.getElementById(o.figureId).textContent = formatMoney(o.perHead);
   document.getElementById(o.mathId).innerHTML =
-    o.ringKg.toFixed(0) + 'kg ring x \u20AC' + fmtPriceKg(o.priceKg) + '/kg = <strong>\u20AC' + formatMoney(o.perHead) + '</strong>';
+    o.ringKg.toFixed(0) + 'kg ring x \u20AC' + fmtPriceKg(o.priceKg) + '/kg' + (window._ff_flag || '') + ' = <strong>\u20AC' + formatMoney(o.perHead) + '</strong>';
 
   const card = document.getElementById(o.cardId);
   card.classList.remove('dear', 'upside');
