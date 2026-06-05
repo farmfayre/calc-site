@@ -969,7 +969,7 @@ document.getElementById('backBtnBottom').addEventListener('click', () => {
 });
 
 // ---- Generate ----
-document.getElementById('generateBtn').addEventListener('click', () => {
+document.getElementById('generateBtn').addEventListener('click', async () => {
   const cat = document.getElementById('category').value;
   const breed = document.getElementById('breed').value;
   const weight = parseFloat(document.getElementById('weight').value);

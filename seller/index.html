@@ -861,7 +861,7 @@ document.getElementById('backBtnBottom').addEventListener('click', () => {
   showFormView();
 });
 
-document.getElementById('generateBtn').addEventListener('click', () => {
+document.getElementById('generateBtn').addEventListener('click', async () => {
   const cat = document.getElementById('category').value;
   const breed = document.getElementById('breed').value;
   const weight = parseFloat(document.getElementById('weight').value);
@@ -884,7 +884,6 @@ document.getElementById('generateBtn').addEventListener('click', () => {
   if (result.error) return alert(result.error);
   const mean = result.mean;
   const a = result.analysis;
-  window._ff_flag = result.flag || "";
   window._ff_flag = result.flag || '';
   const subLabel = result.subLabel;
   const singularSub = subLabel.replace(/s$/, '');
