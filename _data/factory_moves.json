@@ -1,0 +1,19 @@
+{
+  "week": "2026-05-31",
+  "prev_week": "2026-05-24",
+  "coefficient": 0.75,
+  "trigger_cents": 10.0,
+  "moves": {
+    "male/weanling_bulls": -9.2,
+    "female/heifers": -11.0,
+    "male/bullocks": -12.9,
+    "female/dry_fat_cows": -10.2
+  },
+  "levels": {
+    "male/weanling_bulls": 630.4,
+    "female/heifers": 673.4,
+    "male/bullocks": 626.2,
+    "female/dry_fat_cows": 587.5
+  },
+  "generated_at": "2026-06-10T11:09:47.410810+00:00"
+}

@@ -807,6 +807,7 @@ function updateHint() {
       const pd = await resp.json();
       if (pd.error) { hint.textContent = pd.error === 'no data for this weight' ? 'No mart data available for this breed x weight' : pd.error; return; }
       hint.textContent = 'National Breed Average: \u20AC' + fmtPriceKg(pd.mean) + '/kg.' + (pd.flag || '');
+      if (pd.interim) { hint.textContent += ' Factory moved ' + (pd.interim.factoryMoveCents > 0 ? '+' : '') + pd.interim.factoryMoveCents + 'c \u00B7 Correlated \u2248 \u20AC' + fmtPriceKg(pd.interim.estimate) + '/kg (est.)'; }
       window._lastTrend = pd.trend;
       window._lastWeeks = pd.weekEnding;
     } catch(e) { hint.textContent = 'Connection error'; }
@@ -1000,7 +1001,7 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
 
   lastResult = { input: { selectedSex, cat, breed, weight, headCount, ffBid, buyerName, subLabel }, mean, ...a };
 
-  document.getElementById('igWeek').textContent = 'Week ending ' + fmtSaturdayWeekEnd(result.weekEnding);
+  document.getElementById('igWeek').textContent = 'Week ending ' + fmtSaturdayWeekEnd(result.weekEnding) + (result.interim ? ' \u00B7 Market \u20AC' + fmtPriceKg(result.mean) + ' \u00B7 Factory moved ' + (result.interim.factoryMoveCents > 0 ? '+' : '') + result.interim.factoryMoveCents + 'c \u00B7 Correlated \u2248 \u20AC' + fmtPriceKg(result.interim.estimate) + ' (est.)' : '');
   document.getElementById('igEyebrow').textContent = headCount + ' HEAD \u00B7 ' + breed + ' ' + subDisplayUpper + ' \u00B7 ' + weight + 'KG ON FARM';
 
   const h1 = document.getElementById('igH1');

@@ -7,6 +7,41 @@ const fs = require('fs');
 const path = require('path');
 
 let DATA = null;
+let FACTORY = null;
+const FACTORY_CANDIDATES = [
+  require('path').resolve(process.cwd(), '_data/factory_moves.json'),
+  require('path').resolve(__dirname, '_data/factory_moves.json'),
+  require('path').resolve(__dirname, '../../_data/factory_moves.json'),
+  '/var/task/_data/factory_moves.json',
+];
+function loadFactory() {
+  if (FACTORY !== null) return FACTORY;
+  for (const p of FACTORY_CANDIDATES) {
+    try { FACTORY = JSON.parse(fs.readFileSync(p, 'utf8')); return FACTORY; } catch(e) {}
+  }
+  FACTORY = false; // sentinel: not available
+  return FACTORY;
+}
+const PUBLIC_TO_INTERNAL = {
+  'male/bullocks': 'male/bullocks',
+  'male/bulls': 'male/weanling_bulls',
+  'female/heifers': 'female/heifers',
+  'female/dry_cows': 'female/dry_fat_cows',
+};
+function factoryInterim(sex, category, mean) {
+  // Returns {factoryMoveCents, estimate, coefficient} when the factory moved
+  // >= trigger since the settled mart week; otherwise null.
+  const f = loadFactory();
+  if (!f || !f.moves) return null;
+  const key = PUBLIC_TO_INTERNAL[sex + '/' + category];
+  if (!key) return null;
+  const mv = f.moves[key];
+  const trig = f.trigger_cents || 10;
+  const coef = f.coefficient || 0.75;
+  if (mv == null || Math.abs(mv) < trig) return null;
+  const estimate = Math.round((mean + coef * mv / 100) * 20) / 20; // 5c rounding
+  return { factoryMoveCents: mv, estimate, coefficient: coef, factoryWeek: f.week };
+}
 const CANDIDATES = [
   path.resolve(process.cwd(), '_data/market_data.json'),
   path.resolve(__dirname, '_data/market_data.json'),
@@ -24,26 +59,40 @@ function loadData() {
 // ---- Calc functions (ported from client JS, identical logic) ----
 
 function findBandPrice(breedBands, weight) {
+  // Quarter-zone linear taper (v3.1): bottom 25% of each band blends linearly
+  // with the lower band (50/50 at the boundary), middle 50% is the pure band
+  // price, top 25% blends linearly toward the upper band. Continuous everywhere.
   const bands = Object.keys(breedBands);
   if (!bands.length) return null;
-  const parsed = bands.map(b => { const [lo, hi] = b.split('-').map(Number); return { band: b, lo, hi, mid: (lo+hi)/2 }; }).sort((a,b) => a.lo - b.lo);
+  const parsed = bands.map(b => { const [lo, hi] = b.split('-').map(Number); return { band: b, lo, hi }; }).sort((a, b) => a.lo - b.lo);
+  const cur = arr => (arr && arr.length) ? arr[arr.length - 1] : null;
+
   const inside = parsed.find(p => weight >= p.lo && weight < p.hi);
   if (!inside) {
-    const nearest = weight < parsed[0].lo ? parsed[0] : parsed[parsed.length-1];
-    const prices = breedBands[nearest.band];
-    return { mean: prices && prices[prices.length-1], bandName: nearest.band, blended: false };
+    const nearest = weight < parsed[0].lo ? parsed[0] : parsed[parsed.length - 1];
+    return { mean: cur(breedBands[nearest.band]), bandName: nearest.band, blended: false };
   }
-  const lowDist = weight - inside.lo, highDist = inside.hi - weight;
-  const closeToBoundary = (Math.min(lowDist, highDist) / (inside.hi - inside.lo)) < 0.05;
-  const insideCurrent = (breedBands[inside.band] || [])[breedBands[inside.band].length-1];
-  if (!closeToBoundary) return { mean: insideCurrent, bandName: inside.band, blended: false };
-  const adjacent = lowDist < highDist ? parsed.find(p => p.hi === inside.lo) : parsed.find(p => p.lo === inside.hi);
-  if (!adjacent) return { mean: insideCurrent, bandName: inside.band, blended: false };
-  const adjPrices = breedBands[adjacent.band];
-  const adjCurrent = adjPrices && adjPrices[adjPrices.length-1];
-  if (adjCurrent == null) return { mean: insideCurrent, bandName: inside.band, blended: false };
-  if (insideCurrent == null) return { mean: adjCurrent, bandName: adjacent.band, blended: false };
-  return { mean: (insideCurrent + adjCurrent) / 2, bandName: inside.band + ' & ' + adjacent.band, blended: true };
+
+  const insideCurrent = cur(breedBands[inside.band]);
+  const width = inside.hi - inside.lo;
+  const q = width * 0.25;
+  const pos = weight - inside.lo;
+
+  let neighbor = null, wInside = 1;
+  if (pos < q) {
+    neighbor = parsed.find(p => p.hi === inside.lo) || null;
+    wInside = 0.5 + 0.5 * (pos / q);
+  } else if (pos > width - q) {
+    neighbor = parsed.find(p => p.lo === inside.hi) || null;
+    wInside = 0.5 + 0.5 * ((width - pos) / q);
+  }
+
+  if (!neighbor) return { mean: insideCurrent, bandName: inside.band, blended: false };
+  const neighborCurrent = cur(breedBands[neighbor.band]);
+  if (neighborCurrent == null) return { mean: insideCurrent, bandName: inside.band, blended: false };
+  if (insideCurrent == null) return { mean: neighborCurrent, bandName: neighbor.band, blended: false };
+  return { mean: insideCurrent * wInside + neighborCurrent * (1 - wInside),
+           bandName: inside.band + ' & ' + neighbor.band, blended: true };
 }
 
 function analyzeTrade(W, mean, ffBid, N) {
@@ -201,7 +250,8 @@ function handlePrice(data, body) {
   if (!lookup || lookup.mean == null) return { error: 'no data for this weight' };
   const flag = getFlag(data, sex, category, breed, lookup.bandName);
   const trend = buildTrend(breedBands, parseFloat(weight), data.weeks);
-  return { mean: lookup.mean, bandName: lookup.bandName, blended: lookup.blended, flag, trend, weekEnding: data.week_ending };
+  const interim = factoryInterim(sex, category, lookup.mean);
+  return { mean: lookup.mean, bandName: lookup.bandName, blended: lookup.blended, flag, trend, interim, weekEnding: data.week_ending };
 }
 
 function handleCompare(data, body) {
@@ -223,7 +273,8 @@ function handleCompare(data, body) {
   if (a.sellerAvgLoss <= 0) scenarioUsed = 'edge1_redmond_bottom_good';
   else if (((a.sellerAvgLoss + a.buyerAvgCost) / n) > 200) scenarioUsed = 'edge2_extreme_avg_good';
   const tallyTotal = tally.seller.value + Math.max(0, tally.buyer.value);
-  return { weekEnding: data.week_ending, side, mean, flag, subLabel, bandName: lookup.bandName,
+  const interim = factoryInterim(sex, category, mean);
+  return { weekEnding: data.week_ending, side, mean, flag, subLabel, bandName: lookup.bandName, interim,
            analysis: a, tally, tallyTotal, tallyPerHead: tallyTotal / n,
            scenarioUsed, trend, breedNames: data.breed_names || {} };
 }
