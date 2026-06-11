@@ -225,6 +225,7 @@ function buildTrend(breedBands, weight, weeks) {
   const fill = fillTrend(bd.prices);
   if (!fill) return null;
   const lbl = trendLabel(fill.filled);
+  fill.filled = fill.filled.map(v => Math.round(v * 20) / 20);
   return { filled: fill.filled, firstKnownIdx: fill.firstKnownIdx, label: lbl.label, cls: lbl.cls, bandName: bd.bandName, dates: saturdayWeekDates(weeks.slice(-4)) };
 }
 
@@ -241,6 +242,7 @@ function handleBreeds(data) {
   return { week_ending: data.week_ending, categories: cats, breed_names: data.breed_names || {} };
 }
 
+const r5 = v => Math.round(v * 20) / 20;
 function handlePrice(data, body) {
   const { sex, category, breed, weight } = body || {};
   if (!sex || !category || !breed || !weight) return { error: 'missing fields' };
@@ -248,6 +250,7 @@ function handlePrice(data, body) {
   if (!breedBands) return { error: 'breed not found' };
   const lookup = findBandPrice(breedBands, parseFloat(weight));
   if (!lookup || lookup.mean == null) return { error: 'no data for this weight' };
+  lookup.mean = r5(lookup.mean);
   const flag = getFlag(data, sex, category, breed, lookup.bandName);
   const trend = buildTrend(breedBands, parseFloat(weight), data.weeks);
   const interim = factoryInterim(sex, category, lookup.mean);
@@ -262,7 +265,7 @@ function handleCompare(data, body) {
   if (!breedBands) return { error: 'breed not found' };
   const lookup = findBandPrice(breedBands, w);
   if (!lookup || lookup.mean == null) return { error: 'No mart data available for this breed x weight.' };
-  const mean = lookup.mean;
+  const mean = r5(lookup.mean);
   const a = analyzeTrade(w, mean, bid, n);
   const tally = pickTallyScenarios(a);
   const flag = getFlag(data, sex, category, breed, lookup.bandName);
