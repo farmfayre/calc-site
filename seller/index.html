@@ -885,7 +885,7 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
   if (result.error) return alert(result.error);
   const mean = result.mean;
   const a = result.analysis;
-  window._ff_flag = result.flag || "";
+  window._ff_flag = (result.basis === 'estimate') ? ' (est.)' : (result.flag || '');
   const subLabel = result.subLabel;
   const singularSub = subLabel.replace(/s$/, '');
   const subDisplay = headCount === 1 ? singularSub : subLabel;
@@ -932,7 +932,7 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
     mathId: 'igMartAvgMath',
     deltaLabelId: 'igMartAvgDeltaLabel', deltaAmountId: 'igMartAvgDeltaAmount',
     perHead: a.martSellerAvg, delta: a.sellerAvgDelta,
-    ringKg: a.ringWeight, priceKg: mean
+    ringKg: a.ringWeight, priceKg: a.mean
   });
   renderMartScenario({
     cardId: 'igMartTopCard', mainLabelId: 'igMartTopMainLabel', mainLabel: 'Mart - Top 20% of lots',
@@ -940,7 +940,7 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
     mathId: 'igMartTopMath',
     deltaLabelId: 'igMartTopDeltaLabel', deltaAmountId: 'igMartTopDeltaAmount',
     perHead: a.martSellerTop, delta: a.sellerTopDelta,
-    ringKg: a.ringWeight, priceKg: mean * 1.05
+    ringKg: a.ringWeight, priceKg: a.mean * 1.05
   });
   renderMartScenario({
     cardId: 'igMartBottomCard', mainLabelId: 'igMartBottomMainLabel', mainLabel: 'Mart - Bottom 20% of lots',
@@ -948,7 +948,7 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
     mathId: 'igMartBottomMath',
     deltaLabelId: 'igMartBottomDeltaLabel', deltaAmountId: 'igMartBottomDeltaAmount',
     perHead: a.martSellerBottom, delta: a.sellerBottomDelta,
-    ringKg: a.ringWeight, priceKg: mean * 0.95
+    ringKg: a.ringWeight, priceKg: a.mean * 0.95
   });
 
   document.getElementById('igNewspaperPerKg').textContent = '\u20AC' + fmtPriceKg(a.newspaperKg);

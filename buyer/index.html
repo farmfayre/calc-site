@@ -993,7 +993,7 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
   if (result.error) return alert(result.error);
   const mean = result.mean;
   const a = result.analysis;
-  window._ff_flag = result.flag || "";
+  window._ff_flag = (result.basis === 'estimate') ? ' (est.)' : (result.flag || '');
   const subLabel = result.subLabel;
   const singularSub = subLabel.replace(/s$/, '');
   const subDisplay = headCount === 1 ? singularSub : subLabel;
