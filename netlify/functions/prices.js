@@ -266,7 +266,9 @@ function handleCompare(data, body) {
   const lookup = findBandPrice(breedBands, w);
   if (!lookup || lookup.mean == null) return { error: 'No mart data available for this breed x weight.' };
   const mean = r5(lookup.mean);
-  const a = analyzeTrade(w, mean, bid, n);
+  const interim = factoryInterim(sex, category, mean);
+  const basisMean = interim ? interim.estimate : mean;
+  const a = analyzeTrade(w, basisMean, bid, n);
   const tally = pickTallyScenarios(a);
   const flag = getFlag(data, sex, category, breed, lookup.bandName);
   const trend = buildTrend(breedBands, w, data.weeks);
@@ -276,8 +278,7 @@ function handleCompare(data, body) {
   if (a.sellerAvgLoss <= 0) scenarioUsed = 'edge1_redmond_bottom_good';
   else if (((a.sellerAvgLoss + a.buyerAvgCost) / n) > 200) scenarioUsed = 'edge2_extreme_avg_good';
   const tallyTotal = tally.seller.value + Math.max(0, tally.buyer.value);
-  const interim = factoryInterim(sex, category, mean);
-  return { weekEnding: data.week_ending, side, mean, flag, subLabel, bandName: lookup.bandName, interim,
+  return { weekEnding: data.week_ending, side, mean, flag, subLabel, bandName: lookup.bandName, interim, basis: interim ? 'estimate' : 'settled',
            analysis: a, tally, tallyTotal, tallyPerHead: tallyTotal / n,
            scenarioUsed, trend, breedNames: data.breed_names || {} };
 }

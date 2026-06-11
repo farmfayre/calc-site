@@ -1001,7 +1001,7 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
 
   lastResult = { input: { selectedSex, cat, breed, weight, headCount, ffBid, buyerName, subLabel }, mean, ...a };
 
-  document.getElementById('igWeek').textContent = 'Week ending ' + fmtSaturdayWeekEnd(result.weekEnding) + (result.interim ? ' \u00B7 Market \u20AC' + fmtPriceKg(result.mean) + ' \u00B7 Factory moved ' + (result.interim.factoryMoveCents > 0 ? '+' : '') + result.interim.factoryMoveCents + 'c \u00B7 Correlated \u2248 \u20AC' + fmtPriceKg(result.interim.estimate) + ' (est.)' : '');
+  document.getElementById('igWeek').textContent = 'Week ending ' + fmtSaturdayWeekEnd(result.weekEnding) + (result.interim ? ' \u00B7 Market price \u20AC' + fmtPriceKg(result.interim.estimate) + '/kg* \u00B7 *factory moved ' + (result.interim.factoryMoveCents > 0 ? '+' : '') + result.interim.factoryMoveCents + 'c since the settled week (\u20AC' + fmtPriceKg(result.mean) + '/kg) - comparison uses the adjusted figure' : '');
   document.getElementById('igEyebrow').textContent = headCount + ' HEAD \u00B7 ' + breed + ' ' + subDisplayUpper + ' \u00B7 ' + weight + 'KG ON FARM';
 
   const h1 = document.getElementById('igH1');
