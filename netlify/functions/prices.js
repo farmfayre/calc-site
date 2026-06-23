@@ -28,11 +28,15 @@ const PUBLIC_TO_INTERNAL = {
   'female/heifers': 'female/heifers',
   'female/dry_cows': 'female/dry_fat_cows',
 };
-function factoryInterim(sex, category, mean) {
+function factoryInterim(sex, category, mean, weekEnding) {
   // Returns {factoryMoveCents, estimate, coefficient} when the factory moved
   // >= trigger since the settled mart week; otherwise null.
   const f = loadFactory();
   if (!f || !f.moves) return null;
+  // Staleness guard: a factory move only overlays LIVE if its week postdates the
+  // settled mart week. If factory week <= mart week, the mart set already absorbed
+  // it - re-applying would double-count. (Most weeks: DAFM lags mart, so no overlay.)
+  if (!f.week || !weekEnding || new Date(f.week) <= new Date(weekEnding)) return null;
   const key = PUBLIC_TO_INTERNAL[sex + '/' + category];
   if (!key) return null;
   const mv = f.moves[key];
@@ -253,7 +257,7 @@ function handlePrice(data, body) {
   lookup.mean = r5(lookup.mean);
   const flag = getFlag(data, sex, category, breed, lookup.bandName);
   const trend = buildTrend(breedBands, parseFloat(weight), data.weeks);
-  const interim = factoryInterim(sex, category, lookup.mean);
+  const interim = factoryInterim(sex, category, lookup.mean, data.week_ending);
   return { mean: lookup.mean, bandName: lookup.bandName, blended: lookup.blended, flag, trend, interim, weekEnding: data.week_ending };
 }
 
@@ -266,7 +270,7 @@ function handleCompare(data, body) {
   const lookup = findBandPrice(breedBands, w);
   if (!lookup || lookup.mean == null) return { error: 'No mart data available for this breed x weight.' };
   const mean = r5(lookup.mean);
-  const interim = factoryInterim(sex, category, mean);
+  const interim = factoryInterim(sex, category, mean, data.week_ending);
   const basisMean = interim ? interim.estimate : mean;
   const a = analyzeTrade(w, basisMean, bid, n);
   const tally = pickTallyScenarios(a);
