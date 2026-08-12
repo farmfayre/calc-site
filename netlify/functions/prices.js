@@ -41,7 +41,7 @@ function factoryInterim(sex, category, mean, weekEnding) {
   if (!key) return null;
   const mv = f.moves[key];
   const trig = f.trigger_cents || 10;
-  const coef = f.coefficient || 0.75;
+  const coef = f.coefficient || COEFFICIENT_DEFAULT;
   if (mv == null || Math.abs(mv) < trig) return null;
   const estimate = Math.round((mean + coef * mv / 100) * 20) / 20; // 5c rounding
   return { factoryMoveCents: mv, estimate, coefficient: coef, factoryWeek: f.week };
@@ -58,6 +58,72 @@ function loadData() {
     try { DATA = JSON.parse(fs.readFileSync(p, 'utf8')); return DATA; } catch(e) {}
   }
   throw new Error('data not found');
+}
+
+
+// ---- v3.2 (12 Aug 2026): light-male routing + cold-start guard [K rulings MP-A2a/A2b] ----
+const FILL_CEILING_KG = 300;   // same-population blending only at/below this band edge
+const DIVERGENCE_PCT = 0.10;   // closeness test bulls vs calves
+const GRADIENT_TOL = 0.95;     // cold-start below heavier established band by >5% = inverted
+const COEFFICIENT_DEFAULT = 0.5; // K ruling 11 Aug 2026 (was 0.75)
+function nonNullCount(a){ return Array.isArray(a) ? a.filter(v=>v!=null).length : 0; }
+function isEstablished(a){ return nonNullCount(a) >= 2; }
+function isColdStart(a){ return Array.isArray(a) && nonNullCount(a) === 1 && a[a.length-1] != null; }
+function lastVal(a){ return (a && a.length) ? a[a.length-1] : null; }
+function medianOf(xs){ const s=(xs||[]).filter(v=>v!=null).slice().sort((a,b)=>a-b); if(!s.length) return null; const m=Math.floor(s.length/2); return s.length%2 ? s[m] : (s[m-1]+s[m])/2; }
+function blendArrays(a,b){ const n=Math.max(a?a.length:0,b?b.length:0), out=[]; for(let i=0;i<n;i++){ const x=a?a[i]:null, y=b?b[i]:null; out.push(x!=null&&y!=null?(x+y)/2:(x!=null?x:(y!=null?y:null))); } return out; }
+function siblingFill(c1, c2){
+  const e1=isEstablished(c1), e2=isEstablished(c2);
+  if(e1&&e2){ const v1=lastVal(c1), v2=lastVal(c2);
+    if(v1!=null&&v2!=null){ const div=Math.abs(v1-v2)/((v1+v2)/2);
+      if(div<=DIVERGENCE_PCT) return { arr: blendArrays(c1,c2) };
+      const d1=Math.abs(v1-(medianOf(c1.slice(0,-1))??v1)); const d2=Math.abs(v2-(medianOf(c2.slice(0,-1))??v2));
+      return d1<=d2 ? { arr:c1.slice() } : { arr:c2.slice() }; } }
+  if(e1) return { arr:c1.slice() };
+  if(e2) return { arr:c2.slice() };
+  return null;
+}
+function gradientInverted(ownBands, bandName, val){
+  const parsed=Object.keys(ownBands).map(b=>{const[lo,hi]=b.split('-').map(Number);return{b,lo,hi};}).sort((a,b)=>a.lo-b.lo);
+  const idx=parsed.findIndex(p=>p.b===bandName);
+  for(let j=idx+1;j<parsed.length;j++){ const arr=ownBands[parsed[j].b];
+    if(isEstablished(arr)&&lastVal(arr)!=null) return val < lastVal(arr)*GRADIENT_TOL; }
+  return false;
+}
+function resolveBands(data, sex, category, breed){
+  const own = data.categories?.[sex]?.subcategories?.[category]?.breeds?.[breed] || null;
+  if (sex!=='male' || (category!=='bullocks' && category!=='bulls'))
+    return own ? { bands: own, derived: new Set() } : null;
+  const bullocks = data.categories?.male?.subcategories?.bullocks?.breeds?.[breed] || {};
+  const bulls    = data.categories?.male?.subcategories?.bulls?.breeds?.[breed] || {};
+  const calves   = data.aux?.calves?.breeds?.[breed] || {};
+  const sibs = category==='bullocks' ? [bulls,calves] : [calves,bullocks];
+  const bands = {}; const derived = new Set();
+  const names = new Set([...Object.keys(own||{}), ...Object.keys(sibs[0]), ...Object.keys(sibs[1])]);
+  for(const band of names){
+    const hi = Number(band.split('-')[1]);
+    const ownArr = own ? own[band] : null;
+    if (hi > FILL_CEILING_KG){ if(ownArr) bands[band]=ownArr; continue; }
+    const fill = siblingFill(sibs[0][band], sibs[1][band]);
+    if (ownArr && isEstablished(ownArr)){ bands[band]=ownArr; continue; }
+    if (ownArr && isColdStart(ownArr)){
+      const v=lastVal(ownArr);
+      const nearFill = fill && lastVal(fill.arr)!=null && Math.abs(v-lastVal(fill.arr))/((v+lastVal(fill.arr))/2) <= DIVERGENCE_PCT;
+      const inverted = gradientInverted(own, band, v);
+      if (nearFill || (!inverted && !fill)){ bands[band]=ownArr; derived.add(band); continue; }
+      if (fill){ bands[band]=fill.arr; derived.add(band); continue; }
+      continue;
+    }
+    if (!ownArr && fill){ bands[band]=fill.arr; derived.add(band); continue; }
+    if (ownArr) bands[band]=ownArr;
+  }
+  return Object.keys(bands).length ? { bands, derived } : null;
+}
+function derivedFlag(resolved, bandName){
+  if(!resolved || !resolved.derived || !resolved.derived.size) return '';
+  const parts = bandName.includes('&') ? bandName.split(' & ') : [bandName];
+  for(const b of parts){ if(resolved.derived.has(b.trim())) return ' (est.)'; }
+  return '';
 }
 
 // ---- Calc functions (ported from client JS, identical logic) ----
@@ -250,12 +316,13 @@ const r5 = v => Math.round(v * 20) / 20;
 function handlePrice(data, body) {
   const { sex, category, breed, weight } = body || {};
   if (!sex || !category || !breed || !weight) return { error: 'missing fields' };
-  const breedBands = data.categories?.[sex]?.subcategories?.[category]?.breeds?.[breed];
-  if (!breedBands) return { error: 'breed not found' };
+  const resolved = resolveBands(data, sex, category, breed);
+  if (!resolved) return { error: 'breed not found' };
+  const breedBands = resolved.bands;
   const lookup = findBandPrice(breedBands, parseFloat(weight));
   if (!lookup || lookup.mean == null) return { error: 'no data for this weight' };
   lookup.mean = r5(lookup.mean);
-  const flag = getFlag(data, sex, category, breed, lookup.bandName);
+  const flag = getFlag(data, sex, category, breed, lookup.bandName) || derivedFlag(resolved, lookup.bandName);
   const trend = buildTrend(breedBands, parseFloat(weight), data.weeks);
   const interim = factoryInterim(sex, category, lookup.mean, data.week_ending);
   return { mean: lookup.mean, bandName: lookup.bandName, blended: lookup.blended, flag, trend, interim, weekEnding: data.week_ending };
@@ -265,8 +332,9 @@ function handleCompare(data, body) {
   const { sex, category, breed, weight, ffBid, headCount, name, side } = body || {};
   if (!sex || !category || !breed || !weight || !ffBid || !headCount || !side) return { error: 'missing fields' };
   const w = parseFloat(weight), bid = parseFloat(ffBid), n = parseInt(headCount);
-  const breedBands = data.categories?.[sex]?.subcategories?.[category]?.breeds?.[breed];
-  if (!breedBands) return { error: 'breed not found' };
+  const resolved = resolveBands(data, sex, category, breed);
+  if (!resolved) return { error: 'breed not found' };
+  const breedBands = resolved.bands;
   const lookup = findBandPrice(breedBands, w);
   if (!lookup || lookup.mean == null) return { error: 'No mart data available for this breed x weight.' };
   const mean = r5(lookup.mean);
@@ -274,7 +342,7 @@ function handleCompare(data, body) {
   const basisMean = interim ? interim.estimate : mean;
   const a = analyzeTrade(w, basisMean, bid, n);
   const tally = pickTallyScenarios(a);
-  const flag = getFlag(data, sex, category, breed, lookup.bandName);
+  const flag = getFlag(data, sex, category, breed, lookup.bandName) || derivedFlag(resolved, lookup.bandName);
   const trend = buildTrend(breedBands, w, data.weeks);
   const subLabel = data.categories[sex]?.subcategories[category]?.label || category;
   // Scenario tag (mirrors client logic)

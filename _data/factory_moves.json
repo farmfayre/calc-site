@@ -1,7 +1,7 @@
 {
   "week": "2026-06-14",
   "prev_week": "2026-06-07",
-  "coefficient": 0.75,
+  "coefficient": 0.5,
   "trigger_cents": 10.0,
   "moves": {
     "male/weanling_bulls": -4.9,
