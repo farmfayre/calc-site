@@ -25,7 +25,7 @@
                 3.6,
                 3.4,
                 3.0,
-                3.5
+                2.8
               ],
               "500-600": [
                 3.55,
@@ -113,7 +113,7 @@
                 5.15,
                 5.15,
                 3.8,
-                5.1
+                3.45
               ],
               "400-500": [
                 4.65,
@@ -277,7 +277,7 @@
                 4.5,
                 4.65,
                 5.15,
-                4.5
+                5.35
               ],
               "400-500": [
                 4.75,
@@ -538,7 +538,7 @@
                 2.6,
                 2.8,
                 3.5,
-                3.65
+                2.65
               ],
               "300-400": [
                 2.8,
@@ -702,7 +702,7 @@
                 4.65,
                 5.85,
                 5.45,
-                5.4
+                6.3
               ]
             },
             "SIX": {
@@ -856,7 +856,7 @@
                 3.1,
                 3.5,
                 2.9,
-                3.25
+                2.85
               ],
               "600-700": [
                 3.5,
@@ -912,7 +912,7 @@
                 null,
                 3.4,
                 2.45,
-                3.4
+                3.55
               ]
             },
             "FR": {
@@ -976,7 +976,7 @@
                 null,
                 2.55,
                 3.25,
-                2.55
+                2.45
               ],
               "300-400": [
                 null,
@@ -1112,7 +1112,7 @@
                 3.65,
                 3.5,
                 3.1,
-                3.55
+                2.85
               ],
               "600-700": [
                 null,
@@ -1186,128 +1186,6 @@
         "heifers": {
           "label": "Heifers",
           "breeds": {
-            "LMX": {
-              "400-500": [
-                3.8,
-                4.1,
-                3.85,
-                4.2
-              ],
-              "600-700": [
-                3.9,
-                3.65,
-                3.75,
-                3.95
-              ],
-              "300-400": [
-                4.9,
-                3.55,
-                3.5,
-                4.2
-              ],
-              "200-300": [
-                4.7,
-                5.45,
-                4.0,
-                3.8
-              ],
-              "500-600": [
-                4.05,
-                3.8,
-                3.75,
-                3.8
-              ],
-              "700-800": [
-                3.65,
-                3.9,
-                3.65,
-                3.8
-              ]
-            },
-            "AAX": {
-              "100-200": [
-                3.9,
-                3.55,
-                5.1,
-                5.1
-              ],
-              "400-500": [
-                3.5,
-                3.45,
-                3.45,
-                3.6
-              ],
-              "600-700": [
-                3.55,
-                3.45,
-                3.6,
-                3.5
-              ],
-              "300-400": [
-                4.05,
-                3.5,
-                3.4,
-                3.7
-              ],
-              "800-900": [
-                null,
-                null,
-                null,
-                3.65
-              ],
-              "200-300": [
-                3.15,
-                4.05,
-                3.55,
-                3.55
-              ],
-              "500-600": [
-                3.55,
-                3.45,
-                3.5,
-                3.55
-              ],
-              "700-800": [
-                3.9,
-                3.55,
-                3.45,
-                3.35
-              ]
-            },
-            "FRX": {
-              "500-600": [
-                2.95,
-                3.0,
-                3.55,
-                2.95
-              ],
-              "400-500": [
-                null,
-                3.0,
-                3.0,
-                3.0
-              ]
-            },
-            "HE": {
-              "300-400": [
-                null,
-                null,
-                null,
-                3.9
-              ],
-              "500-600": [
-                null,
-                null,
-                null,
-                3.8
-              ],
-              "400-500": [
-                null,
-                null,
-                null,
-                3.55
-              ]
-            },
             "BBX": {
               "400-500": [
                 3.8,
@@ -1315,17 +1193,11 @@
                 3.5,
                 3.8
               ],
-              "600-700": [
-                4.0,
-                3.75,
-                3.6,
-                3.55
-              ],
-              "300-400": [
-                4.0,
-                3.8,
-                3.35,
-                3.45
+              "700-800": [
+                null,
+                null,
+                3.65,
+                3.65
               ],
               "200-300": [
                 4.3,
@@ -1333,31 +1205,23 @@
                 4.6,
                 4.7
               ],
+              "300-400": [
+                4.0,
+                3.8,
+                3.35,
+                3.45
+              ],
               "500-600": [
                 3.85,
                 3.5,
                 3.45,
                 3.6
               ],
-              "700-800": [
-                null,
-                null,
-                3.65,
-                3.65
-              ]
-            },
-            "SI": {
               "600-700": [
-                null,
-                null,
-                null,
-                2.75
-              ],
-              "400-500": [
-                null,
-                null,
-                null,
-                3.4
+                4.0,
+                3.75,
+                3.6,
+                3.55
               ]
             },
             "SIX": {
@@ -1365,24 +1229,24 @@
                 4.35,
                 3.8,
                 3.2,
-                4.05
+                3.05
               ],
-              "600-700": [
-                3.65,
-                3.9,
-                3.65,
-                3.5
-              ],
-              "300-400": [
+              "700-800": [
                 null,
                 null,
                 null,
-                3.95
+                3.65
               ],
               "200-300": [
                 4.15,
                 4.6,
                 4.1,
+                3.95
+              ],
+              "300-400": [
+                null,
+                null,
+                null,
                 3.95
               ],
               "500-600": [
@@ -1391,11 +1255,59 @@
                 3.55,
                 3.85
               ],
-              "700-800": [
+              "600-700": [
+                3.65,
+                3.9,
+                3.65,
+                3.5
+              ]
+            },
+            "FRX": {
+              "400-500": [
+                null,
+                3.0,
+                3.0,
+                3.0
+              ],
+              "500-600": [
+                2.95,
+                3.0,
+                3.55,
+                3.6
+              ]
+            },
+            "CH": {
+              "600-700": [
+                4.2,
+                4.25,
+                4.05,
+                4.15
+              ],
+              "400-500": [
                 null,
                 null,
                 null,
-                3.65
+                4.45
+              ],
+              "300-400": [
+                null,
+                null,
+                null,
+                5.0
+              ],
+              "500-600": [
+                null,
+                4.4,
+                3.9,
+                3.9
+              ]
+            },
+            "AA": {
+              "300-400": [
+                null,
+                null,
+                null,
+                4.2
               ]
             },
             "FR": {
@@ -1405,11 +1317,11 @@
                 2.9,
                 2.8
               ],
-              "600-700": [
-                3.1,
-                3.1,
-                3.45,
-                3.05
+              "200-300": [
+                null,
+                null,
+                2.7,
+                2.7
               ],
               "300-400": [
                 null,
@@ -1417,64 +1329,178 @@
                 2.85,
                 2.85
               ],
-              "200-300": [
-                null,
-                null,
-                2.7,
-                2.7
-              ],
               "500-600": [
                 3.1,
                 3.4,
                 3.55,
                 3.75
-              ]
-            },
-            "CHX": {
-              "400-500": [
-                3.85,
-                3.9,
-                3.9,
-                4.25
               ],
               "600-700": [
-                3.85,
-                3.8,
-                3.75,
-                3.75
+                3.1,
+                3.1,
+                3.45,
+                3.5
+              ]
+            },
+            "HE": {
+              "400-500": [
+                null,
+                null,
+                null,
+                3.55
+              ],
+              "500-600": [
+                null,
+                null,
+                null,
+                3.8
               ],
               "300-400": [
-                4.8,
-                3.85,
-                4.45,
-                4.5
+                null,
+                null,
+                null,
+                3.9
+              ]
+            },
+            "AAX": {
+              "400-500": [
+                3.5,
+                3.45,
+                3.45,
+                3.6
+              ],
+              "700-800": [
+                3.9,
+                3.55,
+                3.45,
+                3.35
+              ],
+              "200-300": [
+                3.15,
+                4.05,
+                3.55,
+                3.55
+              ],
+              "300-400": [
+                4.05,
+                3.5,
+                3.4,
+                3.7
+              ],
+              "500-600": [
+                3.55,
+                3.45,
+                3.5,
+                3.55
+              ],
+              "100-200": [
+                3.9,
+                3.55,
+                5.1,
+                3.7
               ],
               "800-900": [
                 null,
                 null,
-                3.95,
-                3.95
+                null,
+                3.65
               ],
-              "200-300": [
-                null,
-                null,
-                null,
-                5.3
-              ],
-              "500-600": [
-                3.85,
-                3.75,
-                3.85,
-                3.85
+              "600-700": [
+                3.55,
+                3.45,
+                3.6,
+                3.5
+              ]
+            },
+            "HEX": {
+              "400-500": [
+                3.15,
+                3.5,
+                3.15,
+                3.3
               ],
               "700-800": [
-                3.95,
+                null,
+                null,
+                3.6,
+                3.6
+              ],
+              "200-300": [
+                3.55,
+                3.5,
+                3.45,
+                3.25
+              ],
+              "300-400": [
+                3.05,
                 3.7,
+                3.6,
+                3.35
+              ],
+              "500-600": [
+                3.45,
+                3.4,
+                3.35,
+                3.55
+              ],
+              "100-200": [
+                null,
+                4.25,
+                3.35,
+                3.35
+              ],
+              "600-700": [
+                3.55,
+                3.45,
+                3.5,
+                3.45
+              ]
+            },
+            "LMX": {
+              "400-500": [
                 3.8,
+                4.1,
+                3.85,
+                4.2
+              ],
+              "700-800": [
+                3.65,
+                3.9,
+                3.65,
                 3.8
+              ],
+              "200-300": [
+                4.7,
+                5.45,
+                4.0,
+                5.0
+              ],
+              "300-400": [
+                4.9,
+                3.55,
+                3.5,
+                4.95
+              ],
+              "500-600": [
+                4.05,
+                3.8,
+                3.75,
+                3.8
+              ],
+              "600-700": [
+                3.9,
+                3.65,
+                3.75,
+                3.95
               ]
             },
             "LM": {
+              "400-500": [
+                4.5,
+                4.5,
+                3.9,
+                3.6
+              ],
               "300-400": [
                 4.9,
                 4.85,
@@ -1487,101 +1513,75 @@
                 5.35,
                 5.2
               ],
-              "400-500": [
-                4.5,
-                4.5,
-                3.9,
-                4.45
+              "600-700": [
+                3.6,
+                4.25,
+                3.95,
+                3.9
               ],
               "500-600": [
                 4.5,
                 4.05,
                 4.0,
                 3.85
-              ],
-              "600-700": [
-                3.6,
-                4.25,
-                3.95,
-                3.9
               ]
             },
-            "AA": {
-              "300-400": [
-                null,
-                null,
-                null,
-                4.2
-              ]
-            },
-            "CH": {
-              "300-400": [
-                null,
-                null,
-                null,
-                5.0
-              ],
+            "SI": {
               "400-500": [
                 null,
                 null,
                 null,
-                4.45
+                3.4
               ],
-              "500-600": [
+              "600-700": [
                 null,
-                4.4,
+                null,
+                null,
+                2.75
+              ]
+            },
+            "CHX": {
+              "400-500": [
+                3.85,
                 3.9,
-                3.9
-              ],
-              "600-700": [
-                4.2,
-                4.25,
-                4.05,
-                4.15
-              ]
-            },
-            "HEX": {
-              "100-200": [
-                null,
-                4.25,
-                3.35,
-                4.2
-              ],
-              "400-500": [
-                3.15,
-                3.5,
-                3.15,
-                3.3
-              ],
-              "600-700": [
-                3.55,
-                3.45,
-                3.5,
-                3.45
-              ],
-              "300-400": [
-                3.05,
-                3.7,
-                3.6,
-                3.35
-              ],
-              "200-300": [
-                3.55,
-                3.5,
-                3.45,
-                3.25
-              ],
-              "500-600": [
-                3.45,
-                3.4,
-                3.35,
-                3.55
+                3.9,
+                4.25
               ],
               "700-800": [
+                3.95,
+                3.7,
+                3.8,
+                3.8
+              ],
+              "200-300": [
                 null,
                 null,
-                3.6,
-                3.6
+                null,
+                5.3
+              ],
+              "300-400": [
+                4.8,
+                3.85,
+                4.45,
+                4.5
+              ],
+              "500-600": [
+                3.85,
+                3.75,
+                3.85,
+                3.85
+              ],
+              "800-900": [
+                null,
+                null,
+                3.95,
+                3.95
+              ],
+              "600-700": [
+                3.85,
+                3.8,
+                3.75,
+                3.75
               ]
             }
           }
@@ -1629,7 +1629,6 @@
   },
   "flags": {
     "male/bullocks/AAX/300-400": "DERIVED",
-    "male/bullocks/AAX/400-500": "DERIVED",
     "male/bullocks/AAX/500-600": "DERIVED",
     "male/bullocks/AAX/600-700": "DERIVED",
     "male/bullocks/AAX/700-800": "DERIVED",
@@ -1641,7 +1640,6 @@
     "male/bullocks/BBX/700-800": "DERIVED",
     "male/bullocks/BBX/800-900": "DERIVED",
     "male/bullocks/BBX/300-400": "DERIVED",
-    "male/bullocks/CHX/300-400": "DERIVED",
     "male/bullocks/CHX/400-500": "DERIVED",
     "male/bullocks/CHX/500-600": "DERIVED",
     "male/bullocks/CHX/600-700": "DERIVED",
@@ -1664,7 +1662,6 @@
     "male/bullocks/HEX/600-700": "DERIVED",
     "male/bullocks/HEX/700-800": "DERIVED",
     "male/bullocks/HEX/800-900": "DERIVED",
-    "male/bullocks/LMX/300-400": "DERIVED",
     "male/bullocks/LMX/400-500": "DERIVED",
     "male/bullocks/LMX/500-600": "DERIVED",
     "male/bullocks/LMX/600-700": "DERIVED",
@@ -1698,6 +1695,7 @@
     "male/bulls/CHX/500-600": "DERIVED",
     "male/bulls/CHX/600-700": "DERIVED",
     "male/bulls/CHX/700-800": "DERIVED",
+    "male/bulls/FR/200-300": "DERIVED",
     "male/bulls/FR/300-400": "DERIVED",
     "male/bulls/FR/400-500": "DERIVED",
     "male/bulls/FR/500-600": "DERIVED",
@@ -1720,7 +1718,6 @@
     "male/bulls/LMX/400-500": "DERIVED",
     "male/bulls/LMX/500-600": "DERIVED",
     "male/bulls/LMX/600-700": "DERIVED",
-    "male/bulls/LMX/100-200": "DERIVED",
     "male/bulls/SIX/200-300": "DERIVED",
     "male/bulls/SIX/300-400": "DERIVED",
     "male/bulls/SIX/400-500": "DERIVED",
@@ -1735,7 +1732,6 @@
     "male/bulls/AA/400-500": "DERIVED",
     "male/bulls/HE/400-500": "DERIVED",
     "male/bulls/HE/300-400": "DERIVED",
-    "female/dry_cows/AAX/500-600": "DERIVED",
     "female/dry_cows/AAX/600-700": "DERIVED",
     "female/dry_cows/AAX/400-500": "DERIVED",
     "female/dry_cows/CHX/800-900": "DERIVED",
@@ -1749,50 +1745,44 @@
     "female/dry_cows/LMX/800-900": "DERIVED",
     "female/dry_cows/SIX/600-700": "DERIVED",
     "female/dry_cows/HE/600-700": "DERIVED",
-    "female/dry_cows/AA/700-800": "DERIVED",
     "female/dry_cows/SI/800-900": "DERIVED",
     "female/dry_cows/BBX/700-800": "DERIVED",
     "female/dry_cows/BBX/600-700": "DERIVED",
     "female/dry_cows/BBX/500-600": "DERIVED",
     "female/dry_cows/LM/600-700": "DERIVED",
     "female/dry_cows/LM/700-800": "DERIVED",
-    "female/heifers/LMX/300-400": "DERIVED",
-    "female/heifers/LMX/200-300": "DERIVED",
-    "female/heifers/AAX/100-200": "DERIVED",
-    "female/heifers/AAX/200-300": "DERIVED",
-    "female/heifers/AAX/700-800": "DERIVED",
-    "female/heifers/FRX/500-600": "DERIVED",
-    "female/heifers/FRX/400-500": "DERIVED",
-    "female/heifers/HE/300-400": "DERIVED",
-    "female/heifers/HE/500-600": "DERIVED",
-    "female/heifers/BBX/600-700": "DERIVED",
-    "female/heifers/BBX/300-400": "DERIVED",
-    "female/heifers/BBX/200-300": "DERIVED",
     "female/heifers/BBX/700-800": "DERIVED",
-    "female/heifers/SI/600-700": "DERIVED",
-    "female/heifers/SIX/400-500": "DERIVED",
-    "female/heifers/SIX/600-700": "DERIVED",
+    "female/heifers/BBX/200-300": "DERIVED",
+    "female/heifers/BBX/300-400": "DERIVED",
+    "female/heifers/BBX/600-700": "DERIVED",
     "female/heifers/SIX/200-300": "DERIVED",
-    "female/heifers/FR/400-500": "DERIVED",
-    "female/heifers/FR/600-700": "DERIVED",
-    "female/heifers/FR/300-400": "DERIVED",
-    "female/heifers/FR/200-300": "DERIVED",
-    "female/heifers/FR/500-600": "DERIVED",
-    "female/heifers/CHX/300-400": "DERIVED",
-    "female/heifers/CHX/800-900": "DERIVED",
-    "female/heifers/CHX/700-800": "DERIVED",
-    "female/heifers/LM/300-400": "DERIVED",
-    "female/heifers/LM/200-300": "DERIVED",
-    "female/heifers/LM/400-500": "DERIVED",
-    "female/heifers/LM/500-600": "DERIVED",
-    "female/heifers/LM/600-700": "DERIVED",
-    "female/heifers/AA/300-400": "DERIVED",
+    "female/heifers/SIX/600-700": "DERIVED",
+    "female/heifers/FRX/400-500": "DERIVED",
+    "female/heifers/CH/600-700": "DERIVED",
     "female/heifers/CH/400-500": "DERIVED",
     "female/heifers/CH/500-600": "DERIVED",
-    "female/heifers/CH/600-700": "DERIVED",
-    "female/heifers/HEX/100-200": "DERIVED",
+    "female/heifers/AA/300-400": "DERIVED",
+    "female/heifers/FR/400-500": "DERIVED",
+    "female/heifers/FR/200-300": "DERIVED",
+    "female/heifers/FR/300-400": "DERIVED",
+    "female/heifers/FR/500-600": "DERIVED",
+    "female/heifers/HE/500-600": "DERIVED",
+    "female/heifers/HE/300-400": "DERIVED",
+    "female/heifers/AAX/700-800": "DERIVED",
+    "female/heifers/AAX/200-300": "DERIVED",
+    "female/heifers/AAX/100-200": "DERIVED",
+    "female/heifers/HEX/700-800": "DERIVED",
     "female/heifers/HEX/200-300": "DERIVED",
-    "female/heifers/HEX/700-800": "DERIVED"
+    "female/heifers/HEX/100-200": "DERIVED",
+    "female/heifers/LMX/200-300": "DERIVED",
+    "female/heifers/LM/300-400": "DERIVED",
+    "female/heifers/LM/200-300": "DERIVED",
+    "female/heifers/LM/600-700": "DERIVED",
+    "female/heifers/LM/500-600": "DERIVED",
+    "female/heifers/SI/600-700": "DERIVED",
+    "female/heifers/CHX/700-800": "DERIVED",
+    "female/heifers/CHX/300-400": "DERIVED",
+    "female/heifers/CHX/800-900": "DERIVED"
   },
   "aux": {
     "calves": {
